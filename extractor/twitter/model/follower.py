@@ -1,11 +1,21 @@
-class Follower:
+# This is the model for a Twitter follower
+class Follower(object):
 
-    def __init__(self, handle, name, description, is_following, is_default_picture):
+    def __init__(self, user_id, handle, name, description, is_following, is_default_picture):
+        self._user_id = user_id
         self._handle = handle
         self._name = name
         self._description = description
         self._is_following = is_following
         self._is_default_picture = is_default_picture
+
+    @property
+    def id(self):
+        return self._user_id
+
+    @id.setter
+    def handle(self, user_id):
+        self._user_id = user_id
 
     @property
     def handle(self):
@@ -46,11 +56,3 @@ class Follower:
     @is_default_picture.setter
     def is_default_picture(self, is_default_picture):
         self._is_default_picture = is_default_picture
-
-
-
-
-
-
-
-
