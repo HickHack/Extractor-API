@@ -3,15 +3,15 @@
 
 class Connection(object):
 
-    def __init__(self, member_id, name, title, company, headline, distance, profileImageUrl, profileUrl):
+    def __init__(self, member_id, name, title, company, distance, profileImageUrl, profileUrl):
         self._member_id = member_id
         self._name = name
         self._title = title
         self._company = company
-        self._headline = headline
         self._distance = distance
         self._profileImageUrl = profileImageUrl
         self._profileUrl = profileUrl
+        self._sharedConnections = []
 
     @property
     def member_id(self):
@@ -46,21 +46,16 @@ class Connection(object):
         self._company = company
 
     @property
-    def headline(self):
-        return self._headline
-
-    @headline.setter
-    def headline(self, headline):
-        self._headline = headline
-
-    @property
     def distance(self):
         return self._distance
 
     @distance.setter
     def distance(self, distance):
-        self._distance = distance
-
+        if distance.contains('_'):
+            split = distance.split('_')
+            self._distance = int(split[1])
+        else:
+            self._distance = distance
     @property
     def profileImageUrl(self):
         return self._profileImageUrl
@@ -76,6 +71,14 @@ class Connection(object):
     @profileUrl.setter
     def profileUrl(self, profileUrl):
         self._profileUrl = profileUrl
+
+    @property
+    def sharedConnections(self):
+        return self._sharedConnections
+
+    @sharedConnections.setter
+    def sharedConnections(self, sharedConnection):
+        self._sharedConnections = sharedConnection
 
 
 
