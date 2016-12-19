@@ -1,3 +1,5 @@
 .idea
 twitter_followers.txt
 __pycache__
+*parser.cookies.txt
+*.json

@@ -13,6 +13,12 @@ class Connection(object):
         self._profileUrl = profileUrl
         self._sharedConnections = []
 
+    @staticmethod
+    def fromDict(connection):
+        return Connection(connection['_member_id'], connection['_name'], connection['_title'],
+                          connection['_company'], connection['_distance'], connection['_profileImageUrl'],
+                          connection['_profileUrl'])
+
     @property
     def member_id(self):
         return self._member_id
@@ -56,6 +62,7 @@ class Connection(object):
             self._distance = int(split[1])
         else:
             self._distance = distance
+
     @property
     def profileImageUrl(self):
         return self._profileImageUrl
@@ -79,6 +86,9 @@ class Connection(object):
     @sharedConnections.setter
     def sharedConnections(self, sharedConnection):
         self._sharedConnections = sharedConnection
+
+    def addConnection(self, connection):
+        self._sharedConnections.append(connection)
 
 
 
