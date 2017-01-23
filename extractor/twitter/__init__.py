@@ -8,6 +8,6 @@ extractor = TwitterExtractor()
 followers = extractor.extract_followers(handle)
 
 print(len(followers))
-f = open('followers.json', 'w')
+f = open('data/followers.json', 'w')
 f.write(json.dumps(followers))
 f.close()
