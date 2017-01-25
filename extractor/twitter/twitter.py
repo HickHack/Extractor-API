@@ -24,9 +24,9 @@ class TwitterExtractor(object):
         try:
             if self.api.verify_credentials:
                 for temp_follower in tweepy.Cursor(self.api.followers, screen_name=twitter_handle).items():
-                    user_id = temp_follower.id
+                    user_id = temp_follower.member_id
                     handle = temp_follower.screen_name
-                    name = temp_follower.name
+                    name = temp_follower.fullname
                     is_following = temp_follower.following
                     description = temp_follower.description
                     is_default_picture = temp_follower.default_profile_image

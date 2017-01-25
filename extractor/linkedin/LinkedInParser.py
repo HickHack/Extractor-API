@@ -1,12 +1,15 @@
 # Script that authenticates with LinkedIn
 
 import http.cookiejar as cookielib
-import os
-import urllib
 import json
-import jsonpickle
+import os
 import time
-import config as conf
+import urllib
+import jsonpickle
+import extractor.config as conf
+import networkx as nx
+import matplotlib.pyplot as plt
+
 from bs4 import BeautifulSoup
 from extractor.linkedin.model.connection import Connection
 
@@ -18,9 +21,8 @@ wait = int(config['request_throttle'])
 retry_limit = int(config['retry_limit'])
 
 contacts_url = "https://www.linkedin.com/connected/api/v1/contacts/connections-only?start=%d&count=%d&fields=id,name,firstName,lastName,company,title,location,tags,emails,sources,displaySources,connectionDate,secureProfileImageUrl&sort=CREATED_DESC&source=LINKEDIN"
-shared_connections_url = 'https://www.linkedin.com/profile/profile-v2-connections?id=%d&offset=%d&count=%d&distance=1&type=INITIAL'
-# = "https://www.linkedin.com/profile/profile-v2-connections?id=%d&offset=%d&count=%d&distance=1&type=SHARED"
-limit = 500
+all_connections_url = 'https://www.linkedin.com/profile/profile-v2-connections?id=%d&offset=%d&count=%d&distance=1&type=INITIAL'
+shared_connections_url = "https://www.linkedin.com/profile/profile-v2-connections?id=%d&offset=%d&count=%d&distance=1&type=SHARED"
 
 
 class LinkedInParser(object):
@@ -32,21 +34,25 @@ class LinkedInParser(object):
         self.pos = 0
         self.total_requests = 0
         self.network = None
+        self.G = Graph()
 
     def launch(self, login, password):
         self.login = login
         self.password = password
 
         # Simulate browser with cookies enabled
-        self.cookieJar = cookielib.MozillaCookieJar(cookie_filename)
+        self.cookieJar = cookielib.MozillaCookieJar(os.path.dirname(os.path.realpath(__file__)) + cookie_filename)
+
         if os.access(cookie_filename, os.F_OK):
             self.cookieJar.load()
+
         self.opener = urllib.request.build_opener(
             urllib.request.HTTPRedirectHandler(),
             urllib.request.HTTPHandler(debuglevel=0),
             urllib.request.HTTPSHandler(debuglevel=0),
             urllib.request.HTTPCookieProcessor(self.cookieJar)
         )
+
         self.opener.addheaders = [
             ('User-agent', 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.1.4322)')
         ]
@@ -55,25 +61,22 @@ class LinkedInParser(object):
         self.loginPage()
         self.cookieJar.save()
 
-        self.loadRootNode()
-
         # Get contacts to start crawl
-        self.getContacts()
+        self.loadRootNode()
+        self.loadContacts()
 
+        # Start fetching all shared contacts
         for connection in self.network[0].connections:
             print(connection.name)
             print("Total Request Made %d" % self.total_requests)
 
             self.getSharedContacts(connection.member_id)
 
-            if self.pos == limit:
-                break
-
             self.pos += 1
 
         print("Total Request Made %d" % self.total_requests)
 
-        return self.network
+        return self.G
 
         # TODO: Delete cookies file after crawl
 
@@ -83,7 +86,7 @@ class LinkedInParser(object):
         """
         # Throttle Each Request
         time.sleep(wait)
-        print ("Loading URL: %s" % url)
+        print("Loading URL: %s" % url)
 
         try:
             if data is not None:
@@ -97,6 +100,7 @@ class LinkedInParser(object):
             # If URL doesn't load for ANY reason, try again...
             # Quick and dirty solution for 404 returns because of network problems
             # However, this could infinite loop if there's an actual problem
+            # TODO: add timeout
             print('Load Page Retry')
             return self.loadHtml(url, data)
 
@@ -140,7 +144,7 @@ class LinkedInParser(object):
         return soup
 
     def loadRootNode(self):
-        soup = BeautifulSoup(open("data/nhome.html"), 'html5lib')
+        soup = self.loadSoup("http://www.linkedin.com/nhome")
 
         code = soup.find(id="ozidentity-templates/identity-content")
         content = json.loads(code.contents[0])
@@ -150,8 +154,9 @@ class LinkedInParser(object):
         imageUrl = config['cdn_url'] + content['member']['picture']['id']
         profileUrl = soup.find('ul', {'class': "main-nav"}).findAll('a')[1]['href']
 
-        root = Connection('', name, title, '', 0, imageUrl, profileUrl)
+        root = Connection('R', name, title, '', 0, imageUrl, profileUrl)
         self.network = [root]
+        self.G.add_node(root.name, root.__dict__)
 
     def loginPage(self):
         """
@@ -168,11 +173,7 @@ class LinkedInParser(object):
         self.loadHtml("https://www.linkedin.com/uas/login-submit", login_data)
         return
 
-    def loadTitle(self):
-        soup = self.loadSoup("http://www.linkedin.com/nhome")
-        return soup.find("title")
-
-    def getContacts(self):
+    def loadContacts(self):
         count = 10
         start = 0
 
@@ -199,6 +200,7 @@ class LinkedInParser(object):
         offset = 0
 
         # TODO: Handle case when user has premium account (Martin Duffy)
+
         # Make initial request for 10 items
         data = self.loadJson(shared_connections_url % (member_id, offset, count))
 
@@ -206,7 +208,7 @@ class LinkedInParser(object):
             self.parseSharedConnections(data)
             total = len(self.network[0].connections[self.pos].connections)
 
-            num_shared = data['content']['connections']['numAll']
+            num_shared = data['content']['connections']['numShared']
 
             if num_shared > 10:
                 while offset < num_shared and total < num_shared:
@@ -217,13 +219,10 @@ class LinkedInParser(object):
                         self.parseSharedConnections(data)
                     total = len(self.network[0].connections[self.pos].connections)
 
-
-
     @staticmethod
     def hasSharedConnections(data):
         if not data['content']['connections']:
             return False
-
         return True
 
     def parseContacts(self, contacts):
@@ -266,7 +265,12 @@ class LinkedInParser(object):
                     profileUrl = ""
 
                 connection = Connection(member_id, name, title, company, distance, profileImageUrl, profileUrl)
+
                 self.network[0].addConnection(connection)
+
+                # Add non existent node and add edge from root -> connection
+                self.G.add_node(connection.name, connection.__dict__)
+                self.G.add_edge(self.network[0].name, connection.name)
         else:
             raise Exception("No Data Found")
 
@@ -304,29 +308,70 @@ class LinkedInParser(object):
                 profileUrl = ""
 
             tmp = Connection(member_id, name, title, "", distance, profileImageUrl, profileUrl)
+
             self.network[0].connections[self.pos].addConnection(tmp)
+            self.G.add_edge(self.network[0].connections[self.pos].name, tmp.name)
 
     @staticmethod
     def mockNetwork():
-        network = [Connection]
 
-        with open('/home/graham/code/exograph/extractor/extractor/linkedin/data/connections.json') as data_file:
-            data = json.load(data_file)
+        with open(os.path.dirname(os.path.realpath(__file__)) + '/data/test.json') as data_file:
+            data = data_file.read().replace('\n', '')
+            return jsonpickle.decode(data)
 
-        for node in data:
-            temp = Connection(node['_member_id'], node['_name'], node['_title'], node['_company'],
-                              node['_distance'], node['_profileImageUrl'], node['_profileUrl'])
 
-            network.append(temp)
-        return network
+class Graph(object):
 
+    def __init__(self):
+        self._G = nx.Graph()
+
+    # Add (key, attribute dict)
+    def add_node(self, k, attr_dict):
+        clean_attr = self.clean_attr(attr_dict)
+        self._G.add_node(k, clean_attr)
+
+    # Add edge from n -> v
+    def add_edge(self, n, v):
+        self._G.add_edge(n, v)
+
+    # Returns true is exists
+    def does_node_exist(self, n):
+        return n in self._G.nodes()
+
+    def getGraph(self):
+        return self._G
+
+    def draw(self):
+        graph_pos = nx.spring_layout(self._G)
+
+        # draw nodes, edges and labels
+        # nx.draw_networkx_nodes(self._G, graph_pos, node_size=1000, node_color='blue', alpha=0.3)
+        # nx.draw_networkx_edges(self._G, graph_pos)
+        # nx.draw_networkx_labels(self._G, graph_pos, font_size=12, font_family='sans-serif')
+
+        nx.draw(self._G, graph_pos, node_color='#A0CBE2', edge_color='#B0C23E', width=2, edge_cmap=plt.cm.Blues,
+                with_labels=True)
+        plt.show()
+
+    def write_to_file(self):
+        # TODO add dynamic file path
+        nx.write_graphml(self._G, "/home/graham/code/exograph/extractor_api/extractor/linkedin/data/linkedin.graphml")
+
+    @staticmethod
+    def clean_attr(attr_dict):
+        props = dict(attr_dict)
+
+        if 'connections' in props:
+            del props['connections']
+        return props
 
 start_time = int(round(time.time()))
-network = LinkedInParser().launch(username, passphrase)
+graph = LinkedInParser().launch(username, passphrase)
 end_time = int(round(time.time()))
 
 print("Total Time Taken: %d seconds" % (end_time - start_time))
 
-file = open("data/test.json", "w")
-file.write(jsonpickle.encode(network, unpicklable=False))
+graph.write_to_file()
+
+
 
