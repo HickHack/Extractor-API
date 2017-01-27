@@ -6,3 +6,4 @@ __pycache__
 config.properties
 extractor/linkedin/data/
 *.sqlite3
+*.swp
