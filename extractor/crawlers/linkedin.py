@@ -1,4 +1,6 @@
-# Script that authenticates with LinkedIn and fetches connections
+"""
+LinkedIn crawler for pulling connection data from the LinkedIn api
+"""
 
 import http.cookiejar as cookielib
 import json
@@ -278,13 +280,3 @@ class Graph(object):
         if 'connections' in props:
             del props['connections']
         return props
-
-if __name__ == '__main__':
-    start_time = int(round(time.time()))
-    graph = LinkedInCrawler(username, passphrase).launch()
-    end_time = int(round(time.time()))
-
-    print("Total Time Taken: %d seconds" % (end_time - start_time))
-
-    graph.write_to_file()
-    graph.draw()

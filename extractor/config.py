@@ -13,8 +13,6 @@ class Config(object):
     def load(self):
         if os.access(self.path, os.F_OK) and os.path.isfile(self.path):
             self.config.read(self.path)
-        else:
-            raise IOError('Config properties not found')
 
     def linkedIn(self):
         return self.config['LINKEDIN']
