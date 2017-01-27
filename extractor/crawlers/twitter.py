@@ -1,6 +1,6 @@
 import tweepy
 
-from extractor.twitter.model.follower import Follower
+from extractor.model.twitter import Follower
 
 
 class TwitterExtractor(object):

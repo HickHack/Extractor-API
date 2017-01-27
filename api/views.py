@@ -1,9 +1,9 @@
 import jsonpickle
 
 from django.http import HttpResponse
-from extractor import LinkedInParser
+from extractor import LinkedInCrawler
 
 
 def index(request):
-    network = LinkedInParser().mockNetwork()
+    network = LinkedInCrawler().mock_network()
     return HttpResponse(jsonpickle.encode(network, unpicklable=False))

@@ -1,4 +1,8 @@
-# This is the model for a Twitter follower
+"""
+Twitter Models for followers and followees
+"""
+
+
 class Follower(object):
 
     def __init__(self, user_id, handle, name, description, is_following, is_default_picture):

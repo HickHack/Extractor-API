@@ -1,1 +1,1 @@
-from extractor.linkedin.LinkedInParser import LinkedInParser
+from extractor.crawlers.linkedin import LinkedInCrawler

@@ -1,18 +1,25 @@
 import os
-from configparser import ConfigParser
+from configparser import RawConfigParser
 
 
 class Config(object):
 
     def __init__(self):
-        self.config = ConfigParser()
-        self.config.read(os.path.split(os.path.abspath(__file__))[0]+'/config.properties')
+        self.path = ('%s/config.properties' % os.path.split(os.path.abspath(__file__))[0])
+        self.config = RawConfigParser()
+
+        self.load()
+
+    def load(self):
+        if os.access(self.path, os.F_OK) and os.path.isfile(self.path):
+            self.config.read(self.path)
+        else:
+            raise IOError('Config properties not found')
 
     def linkedIn(self):
         return self.config['LINKEDIN']
 
     def neo4j(self):
         return self.config['NEO4J']
-
 
 
