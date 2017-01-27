@@ -3,7 +3,6 @@ twitter_followers.txt
 __pycache__
 *parser.cookies.txt
 *.json
-config.properties
 extractor/linkedin/data/
 *.sqlite3
 *.swp
