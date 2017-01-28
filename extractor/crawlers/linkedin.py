@@ -48,14 +48,14 @@ class LinkedInCrawler(object):
         self.load_seed()
         self.load_contacts()
 
-        # Start fetching all shared contacts
-        for connection in self.network[0].connections:
-            print('%s\nTotal Request Made %d' % (connection.name, self.total_requests))
+        # # Start fetching all shared contacts
+        # for connection in self.network[0].connections:
+        #     print('%s\nTotal Request Made %d' % (connection.name, self.total_requests))
+        #
+        #     self.load_shared_connections(connection.member_id)
+        #     self.pos += 1
 
-            self.load_shared_connections(connection.member_id)
-            self.pos += 1
-
-        return self.G
+        return self.G.get_graph()
 
         # TODO: Delete cookies file after crawl
 
@@ -259,9 +259,6 @@ class Graph(object):
     def does_node_exist(self, n):
         return n in self._G.nodes()
 
-    def getGraph(self):
-        return self._G
-
     def draw(self):
         graph_pos = nx.spring_layout(self._G)
 
@@ -270,8 +267,10 @@ class Graph(object):
         plt.show()
 
     def write_to_file(self):
-        # TODO add dynamic file path
         nx.write_graphml(self._G, os.path.dirname(os.path.realpath(__file__)) + '/data/linkedin.graphml')
+
+    def get_graph(self):
+        return self._G
 
     @staticmethod
     def clean_attr(attr_dict):

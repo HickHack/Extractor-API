@@ -1,9 +1,13 @@
-import jsonpickle
-
+import extractor
 from django.http import HttpResponse
-from extractor import LinkedInCrawler
+from threading import Thread
 
 
 def index(request):
-    network = LinkedInCrawler().mock_network()
-    return HttpResponse(jsonpickle.encode(network, unpicklable=False))
+    username = ''
+    password = ''
+
+    thread = Thread(target=extractor.run_linkedin, args=(username, password))
+    thread.start()
+
+    return HttpResponse('Job Running eta 5 mins')
