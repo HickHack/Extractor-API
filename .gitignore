@@ -5,4 +5,3 @@ __pycache__
 *.json
 extractor/linkedin/data/
 *.sqlite3
-*.swp
