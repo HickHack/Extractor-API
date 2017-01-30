@@ -5,3 +5,5 @@ __pycache__
 *.json
 extractor/linkedin/data/
 *.sqlite3
+extractor/crawlers/data/linkedin
+.cache

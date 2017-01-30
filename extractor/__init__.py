@@ -4,18 +4,23 @@ the api entry point. The service is run on
 a thread
 """
 
-import time
-from extractor.crawlers.linkedin import LinkedInCrawler
+import extractor.crawlers.linkedin as linkedin
 from extractor.persistence.bulk_loader import BulkLoader
+from extractor.config import Config
+
+config = Config()
 
 
 def run_linkedin(username, password):
-    start_time = int(round(time.time()))
+    if config.env()['env'] != 'TEST':
+        graph = linkedin.LinkedInCrawler(username, password).launch()
 
-    graph = LinkedInCrawler.mock_network()
-    loader = BulkLoader()
-    status = loader.load(graph, 'Connection', 'CONNECTED_TO')
+        if isinstance(graph, Exception):
+            # TODO log exception
+            print('Crawler Failed')
+        else:
+            loader = BulkLoader()
+            status = loader.load(graph, 'Connection', 'CONNECTED_TO')
 
-    end_time = int(round(time.time()))
-
-    print("Total Time Taken: %d seconds" % (end_time - start_time))
+            if not status['success']:
+                print('Bulk Load Failure')

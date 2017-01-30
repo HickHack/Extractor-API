@@ -8,17 +8,15 @@ import os
 import time
 import urllib
 
+from json.decoder import JSONDecodeError
 import matplotlib.pyplot as plt
 import networkx as nx
-
 from bs4 import BeautifulSoup
 
 import extractor.config as conf
 from extractor.model.linkedin import Connection
 
 config = conf.Config().linkedIn()
-username = config['username']
-passphrase = config['password']
 cookie_filename = config['cookie_file']
 wait = int(config['request_throttle'])
 retry_limit = int(config['retry_limit'])
@@ -29,8 +27,8 @@ shared_connections_url = config['shared_connections_url']
 
 
 class LinkedInCrawler(object):
-    def __init__(self, uname, password):
-        self.username = uname
+    def __init__(self, username, password):
+        self.username = username
         self.password = password
         self.retry_count = 0
         self.pos = 0
@@ -44,16 +42,19 @@ class LinkedInCrawler(object):
         # Simulate browser
         self.configure_opener()
 
-        self.login()
-        self.load_seed()
-        self.load_contacts()
+        try:
+            self.login()
+            self.load_seed()
+            self.load_contacts()
+        except Exception as e:
+            return e
 
-        # # Start fetching all shared contacts
-        # for connection in self.network[0].connections:
-        #     print('%s\nTotal Request Made %d' % (connection.name, self.total_requests))
-        #
-        #     self.load_shared_connections(connection.member_id)
-        #     self.pos += 1
+        # Start fetching all shared contacts
+        for connection in self.network[0].connections:
+            print('%s\nTotal Request Made %d' % (connection.name, self.total_requests))
+
+            self.load_shared_connections(connection.member_id)
+            self.pos += 1
 
         return self.G.get_graph()
 
@@ -74,7 +75,7 @@ class LinkedInCrawler(object):
             ('User-agent', 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.1.4322)')
         ]
 
-    def load_html(self, url, data=None):
+    def request_html(self, url, data=None):
 
         response = self.request(url, data)
         if response is not None:
@@ -82,13 +83,16 @@ class LinkedInCrawler(object):
         else:
             return ''
 
-    def fetch_json(self, url, data=None):
+    def request_json(self, url, data=None):
 
         response = self.request(url, data)
         body = response.read()
         encoding = response.info().get_content_charset('utf-8')
 
-        return json.loads(body.decode(encoding))
+        try:
+            return json.loads(body.decode(encoding))
+        except JSONDecodeError as e:
+            return {}
 
     def request(self, url, data=None):
         print("Loading URL: %s" % url)
@@ -120,7 +124,7 @@ class LinkedInCrawler(object):
     """
 
     def load_soup(self, url, data=None):
-        html = self.load_html(url, data)
+        html = self.request_html(url, data)
         soup = BeautifulSoup(html, "html5lib")
 
         return soup
@@ -128,22 +132,30 @@ class LinkedInCrawler(object):
     """
     Fetches the root node which the account of root node
     """
-
     def load_seed(self):
         soup = self.load_soup("http://www.linkedin.com/nhome")
-
         code = soup.find(id="ozidentity-templates/identity-content")
-        content = json.loads(code.contents[0])
 
-        name = content['member']['name']['fullName']
-        title = content['member']['headline']['text']
-        profile_image_url = config['cdn_url'] + content['member']['picture']['id']
-        profile_url = soup.find('ul', {'class': "main-nav"}).findAll('a')[1]['href']
+        try:
+            content = json.loads(code.contents[0])
+        except Exception:
+            raise NoDataException('No seed data found')
+
+        try:
+            name = content['member']['name']['fullName'] if 'fullName' in content['member']['name'] else ' '
+            title = content['member']['headline']['text'] if 'text' in content['member']['headline'] else ' '
+            profile_image_url = config['cdn_url'] + content['member']['picture']['id'] if 'id' in content['member']['picture'] else ' '
+
+            url = soup.find('ul', {'class': "main-nav"}).findAll('a')[1]['href']
+            profile_url = url if url is not None else ' '
+
+        except KeyError:
+            raise ParseException('Error Parsing Seed')
 
         root = Connection('R', name, title,
-                              '', '', '',
-                              '', '', '',
-                              profile_image_url, profile_url)
+                          ' ', ' ', ' ',
+                          ' ', ' ', ' ',
+                          profile_image_url, profile_url)
         self.network = [root]
         self.G.add_node(root.name, root.__dict__)
 
@@ -160,7 +172,11 @@ class LinkedInCrawler(object):
             'loginCsrfParam': csrf,
         }).encode('utf8')
 
-        self.request("https://www.linkedin.com/uas/login-submit", login_data)
+        response = self.request("https://www.linkedin.com/uas/login-submit", login_data)
+
+        if response.url != config['home_url']:
+            raise LoginException('Login Failed')
+
         self.cookie_jar.save()
 
     def load_contacts(self):
@@ -168,22 +184,20 @@ class LinkedInCrawler(object):
         start = 0
 
         # Make initial request for 10 items
-        data = self.fetch_json(contacts_url % (start, count))
+        data = self.request_json(contacts_url % (start, count))
 
-        if not data['values']:
-            raise Exception("No Data Found")
-        elif not data['paging']:
-            raise Exception("No Paging Data Found")
+        if ('values' not in data) or ('paging' not in data):
+            raise ParseException('No data to start crawl')
 
         total = data['paging']['total']
 
         if total <= 200:
             # Request all in one swoop
-            data = self.fetch_json(contacts_url % (start, total))
+            data = self.request_json(contacts_url % (start, total))
             self.parse_contacts(data)
         else:
             # TODO: Add Paging
-            print("Start Paging")
+            print('')
 
     def load_shared_connections(self, member_id):
         count = 10
@@ -192,7 +206,7 @@ class LinkedInCrawler(object):
         # TODO: Handle case when user has premium account (Martin Duffy)
 
         # Make initial request for 10 items
-        data = self.fetch_json(shared_connections_url % (member_id, offset, count))
+        data = self.request_json(shared_connections_url % (member_id, offset, count))
 
         if data is not None and self.has_shared_connections(data):
             self.parse_shared_connections(data)
@@ -203,7 +217,7 @@ class LinkedInCrawler(object):
             if num_shared > 10:
                 while offset < num_shared and total < num_shared:
                     offset += 10
-                    data = self.fetch_json(shared_connections_url % (member_id, offset, count))
+                    data = self.request_json(shared_connections_url % (member_id, offset, count))
 
                     if data is not None and self.has_shared_connections(data):
                         self.parse_shared_connections(data)
@@ -218,7 +232,6 @@ class LinkedInCrawler(object):
     def parse_contacts(self, contacts):
         if contacts['values']:
             for connection in contacts['values']:
-
                 node = Connection.parse_contact(connection)
 
                 self.network[0].addConnection(node)
@@ -279,3 +292,21 @@ class Graph(object):
         if 'connections' in props:
             del props['connections']
         return props
+
+
+class LoginException(Exception):
+    def __init__(self, message):
+        super(LoginException, self).__init__(message)
+
+
+class ParseException(Exception):
+    def __init__(self, message):
+        super(ParseException, self).__init__(message)
+
+
+class NoDataException(Exception):
+    def __init__(self, message):
+        super(NoDataException, self).__init__(message)
+
+
+

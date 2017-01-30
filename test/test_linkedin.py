@@ -1,5 +1,6 @@
 import unittest
 import mock
+from bs4 import BeautifulSoup
 from extractor.crawlers.linkedin import LinkedInCrawler
 
 
@@ -71,7 +72,7 @@ class LinkedInCrawlerTest(unittest.TestCase):
         self.assertEqual(1, reference.total_requests)
 
     @mock.patch('extractor.crawlers.linkedin.urllib')
-    def test_request_with_data_POST(self, mock_urllib):
+    def test_request_failure_with_data_POST(self, mock_urllib):
         reference = LinkedInCrawler('', '')
 
         reference.opener = mock_urllib.request.build_opener
@@ -82,6 +83,40 @@ class LinkedInCrawlerTest(unittest.TestCase):
         mock_urllib.request.build_opener.open.assert_called_with('some url')
         self.assertRaises(Exception, 'Some Exception')
 
+    @mock.patch.object(LinkedInCrawler, 'request_html')
+    def test_load_soup_valid_html(self, mock_load_html):
+        reference = LinkedInCrawler('', '')
+        mock_load_html.return_value = '<html><head><title>Test</title></head>'
 
-if __name__ == '__main__':
-    unittest.main()
+        soup = reference.load_soup('some url', 'some data')
+
+        mock_load_html.assert_called_with('some url', 'some data')
+        self.assertIs(BeautifulSoup, type(soup))
+
+    @mock.patch('http.client.HTTPResponse')
+    @mock.patch.object(LinkedInCrawler, 'request')
+    def test_request_json(self, mock_request, mock_response):
+        reference = LinkedInCrawler('', '')
+
+        mock_request.return_value = mock_response
+        mock_response.read.return_value = b'{"key": 1024}'
+        mock_response.info().get_content_charset.return_value = 'utf-8'
+
+        json = reference.request_json('some url', 'some data')
+
+        mock_request.assert_called_with('some url', 'some data')
+        self.assertTrue(mock_response.read.called)
+        self.assertDictEqual(json, {'key': 1024})
+
+    @mock.patch('http.client.HTTPResponse')
+    @mock.patch.object(LinkedInCrawler, 'request')
+    def test_request_json_error(self, mock_request, mock_response):
+        reference = LinkedInCrawler('', '')
+
+        mock_request.return_value = mock_response
+        mock_response.read.return_value = b'{key: 1024}'
+        mock_response.info().get_content_charset.return_value = 'utf-8'
+
+        json = reference.request_json('', '')
+
+        self.assertDictEqual(json, {})
