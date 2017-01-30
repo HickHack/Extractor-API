@@ -4,15 +4,14 @@ the api entry point. The service is run on
 a thread
 """
 
+import os
 import extractor.crawlers.linkedin as linkedin
 from extractor.persistence.bulk_loader import BulkLoader
 from extractor.config import Config
 
-config = Config()
-
 
 def run_linkedin(username, password):
-    if config.env()['env'] != 'TEST':
+    if os.environ['ENV'] == 'PROD':
         graph = linkedin.LinkedInCrawler(username, password).launch()
 
         if isinstance(graph, Exception):

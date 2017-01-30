@@ -1,5 +1,5 @@
+import time
 from django.http import JsonResponse
-from api.models import ResponseTemplate
 from rest_framework import status
 from rest_framework.views import exception_handler
 
@@ -10,7 +10,7 @@ def custom_exception_handler(exc, context):
     try:
         detail = response.data['detail']
     except AttributeError:
-        detail = exc.message
+        detail = exc
 
     res = ResponseTemplate(detail)
 
@@ -35,6 +35,20 @@ def permission_denied(request):
 def bad_request(request):
     res = ResponseTemplate('Bad Request')
     return JsonResponse(res.__dict__, status=status.HTTP_400_BAD_REQUEST)
+
+
+def generate_timestamp():
+    return int(round(time.time() * 1000))
+
+
+class ResponseTemplate(object):
+
+    def __init__(self, message):
+        self.message = message
+        self.jobs = []
+
+    def add_job(self, job):
+        self.jobs.append(job)
 
 
 

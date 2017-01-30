@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 
 import os
 
+os.environ['ENV'] = 'DEV'
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -22,7 +24,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '%bei8wvb+9z@3k9f4$f0)(i!vc^o=d%-@n*201m5uq6cxyrlz7'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ['ENV'] == 'DEV'
 
 ALLOWED_HOSTS = ['*']
 
@@ -88,7 +90,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'extractor_service',
         'USER': 'root',
-        'PASSWORD': 'Pa55w0rd!',
+        'PASSWORD': '',
         'HOST': '127.0.0.1',
         'PORT': '3306',
         'TEST': {

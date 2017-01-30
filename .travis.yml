@@ -6,10 +6,7 @@ cache: pip
 services:
   - mysql
 before_install:
-#  - sudo add-apt-repository "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) main universe restricted multiverse"
   - sudo apt-get update
-#  - sudo apt-get install python-dev -y
-#  - sudo apt-get install libpython-dev -y
   - sudo apt-get install python-html5lib
   - sudo apt-get install libmysqlclient-dev -y
 install:
