@@ -13,10 +13,15 @@ Including another URLconf
     1. Import the include() function: from django.conf.urls import url, include
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
-from django.conf.urls import url, include
+from django.conf.urls import url, include, handler400, handler403, handler404, handler500
 from django.contrib import admin
 
 urlpatterns = [
-    url(r'^admin/', admin.site.urls),
-    url(r'^api/v1/', include('api.urls'))
+    url(r'^admin', admin.site.urls),
+    url(r'^api/v1', include('api.urls'))
 ]
+
+handler400 = 'api.utils.bad_request'
+handler403 = 'api.utils.permission_denied'
+handler404 = 'api.utils.not_found'
+handler500 = 'api.utils.server_error'

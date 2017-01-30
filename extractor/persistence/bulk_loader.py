@@ -33,7 +33,7 @@ class BulkLoader(object):
         cypher = self.generate_cypher()
 
         try:
-            driver = GraphDatabase.driver(host, auth=basic_auth("neo4j", ""))
+            driver = GraphDatabase.driver(host, auth=basic_auth("neo4j", "Pa55w0rd!"))
             session = driver.session()
 
             session.run(cypher)
