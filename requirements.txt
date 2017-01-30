@@ -6,3 +6,5 @@ networkx==1.11
 tweepy==3.5.0
 beautifulsoup4==4.5.3
 djangorestframework==3.5.3
+pytest==2.7.2
+pytest-django==2.8.0
