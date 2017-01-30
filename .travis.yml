@@ -10,6 +10,7 @@ before_install:
   - sudo apt-get update
 #  - sudo apt-get install python-dev -y
 #  - sudo apt-get install libpython-dev -y
+  - sudo apt-get install python-html5lib
   - sudo apt-get install libmysqlclient-dev -y
 install:
   - pip install -r requirements.txt
