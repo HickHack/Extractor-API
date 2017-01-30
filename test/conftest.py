@@ -19,7 +19,7 @@ def pytest_configure():
         'default': {
             'ENGINE': 'django.db.backends.mysql',
             'USER': 'root',
-            'PASSWORD': 'Pa55w0rd!',
+            'PASSWORD': '',
             'HOST': '127.0.0.1',
             'PORT': '3306',
             'TEST': {
