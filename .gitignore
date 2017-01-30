@@ -7,3 +7,4 @@ extractor/linkedin/data/
 *.sqlite3
 extractor/crawlers/data/linkedin
 .cache
+*.pyc

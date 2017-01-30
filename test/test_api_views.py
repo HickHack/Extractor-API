@@ -5,7 +5,6 @@ from django.http import JsonResponse
 
 class ApiViewsTest(TestCase):
 
-
     def setUp(self):
         self.client = Client()
 
