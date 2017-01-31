@@ -5,7 +5,7 @@ API Controller unit tests
 import mock
 import api.controllers as controllers
 from django.test import TestCase
-from api.utils import ResponseTemplate
+from api.utils import ResponsePayload
 
 
 class TestAPIControllers(TestCase):
@@ -18,7 +18,7 @@ class TestAPIControllers(TestCase):
 
         self.assertTrue(mock_thread.called)
         self.assertTrue(mock_job.called)
-        self.assertTrue(isinstance(result, ResponseTemplate))
+        self.assertTrue(isinstance(result, ResponsePayload))
         self.assertTrue(result.jobs)
         mock_job_type.objects.get.called_with(1)
 
@@ -27,7 +27,7 @@ class TestAPIControllers(TestCase):
         result = controllers.process_get_job_by_id(1)
 
         mock_job.obejects.get.called_with(1)
-        self.assertTrue(isinstance(result, ResponseTemplate))
+        self.assertTrue(isinstance(result, ResponsePayload))
         self.assertTrue(result.jobs)
 
     @mock.patch('api.controllers.Job')
@@ -35,7 +35,7 @@ class TestAPIControllers(TestCase):
         result = controllers.process_get_job_by_user_id(1)
 
         mock_job.objects.all.filter.called_with(1)
-        self.assertTrue(isinstance(result, ResponseTemplate))
+        self.assertTrue(isinstance(result, ResponsePayload))
         self.assertFalse(result.jobs)
 
 
