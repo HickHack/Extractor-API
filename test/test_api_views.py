@@ -42,7 +42,7 @@ class ApiViewsTest(TransactionTestCase):
     def test_run_linkedin_GET_fails(self):
         response = self.client.get('/api/v1/linkedin')
 
-        self.assertEqual(500, response.status_code)
+        self.assertEqual(405, response.status_code)
         self.assertTrue(isinstance(response, JsonResponse))
 
     def test_get_job_by_id_404(self):
@@ -54,7 +54,7 @@ class ApiViewsTest(TransactionTestCase):
     def test_get_job_by_id_POST_fails(self):
         response = self.client.post('/api/v1/job/201')
 
-        self.assertEqual(500, response.status_code)
+        self.assertEqual(405, response.status_code)
 
     def test_get_job_by_id(self):
         response = self.client.get('/api/v1/job/1')
@@ -64,7 +64,7 @@ class ApiViewsTest(TransactionTestCase):
     def test_get_job_by_user_id_POST_fails(self):
         response = self.client.post('/api/v1/job/user/10')
 
-        self.assertEqual(500, response.status_code)
+        self.assertEqual(405, response.status_code)
 
     def test_get_job_by_user_id(self):
         response = self.client.get('/api/v1/job/user/10')

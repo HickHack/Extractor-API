@@ -12,28 +12,28 @@ def custom_exception_handler(exc, context):
     except AttributeError:
         detail = exc
 
-    res = ResponseTemplate(detail)
+    res = ResponsePayload(detail)
 
-    return JsonResponse(res.__dict__, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    return JsonResponse(res.__dict__, status=exc.status_code)
 
 
 def server_error(request):
-    res = ResponseTemplate('Server Error')
+    res = ResponsePayload('Server Error')
     return JsonResponse(res.__dict__, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 def not_found(request):
-    res = ResponseTemplate('Not Found')
+    res = ResponsePayload('Not Found')
     return JsonResponse(res.__dict__, status=status.HTTP_404_NOT_FOUND)
 
 
 def permission_denied(request):
-    res = ResponseTemplate('Access Denied')
+    res = ResponsePayload('Access Denied')
     return JsonResponse(res.__dict__, status=status.HTTP_403_FORBIDDEN)
 
 
 def bad_request(request):
-    res = ResponseTemplate('Bad Request')
+    res = ResponsePayload('Bad Request')
     return JsonResponse(res.__dict__, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -41,7 +41,7 @@ def generate_timestamp():
     return int(round(time.time() * 1000))
 
 
-class ResponseTemplate(object):
+class ResponsePayload(object):
 
     def __init__(self, message):
         self.message = message
