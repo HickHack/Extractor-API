@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 import os
 import datetime
 
-os.environ['ENV'] = 'TEST'
+ENV = 'DEV'
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -25,9 +25,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '%bei8wvb+9z@3k9f4$f0)(i!vc^o=d%-@n*201m5uq6cxyrlz7'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ['ENV'] == 'DEV'
+DEBUG = ENV == 'DEV'
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 APPEND_SLASH = False
 
@@ -52,6 +52,9 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
     ),
     'EXCEPTION_HANDLER': 'api.utils.custom_exception_handler',
 }
@@ -108,7 +111,7 @@ JWT_AUTH = {
     'JWT_VERIFY': True,
     'JWT_VERIFY_EXPIRATION': True,
     'JWT_LEEWAY': 0,
-    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=5),
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(minutes=30),
     'JWT_AUDIENCE': None,
     'JWT_ISSUER': None,
 
@@ -172,3 +175,16 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 
 STATIC_URL = '/static/'
+
+SCHEME = 'http'
+HOST = ALLOWED_HOSTS[0]
+PORT = 8000
+
+ENDPOINTS = {
+    'endpoints': '%s://%s:%d/api/v1/endpoints' % (SCHEME, HOST, PORT),
+    'job_by_id': '%s://%s:%d/api/v1/job/<id>' % (SCHEME, HOST, PORT),
+    'job_by_user_id': '%s://%s:%d/api/v1/job/user/<user_id>' % (SCHEME, HOST, PORT),
+    'run_linkedin': '%s://%s:%d/api/v1/linkedin' % (SCHEME, HOST, PORT),
+    'api_token_auth': '%s://%s:%d/api/v1/api-token-auth' % (SCHEME, HOST, PORT),
+    'api_token_refresh': '%s://%s:%d/api/v1/api-token-refresh' % (SCHEME, HOST, PORT),
+}

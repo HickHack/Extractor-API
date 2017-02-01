@@ -23,14 +23,16 @@ class BulkLoader(object):
         self._graph = None
         self._label = None
         self._rel = None
-        self._status = {'success': False, 'mgs': ''}
 
     def load(self, graph, label, rel='KNOWS', host='bolt://localhost:7687'):
         self._graph = graph
         self._label = label
         self._rel = rel
 
-        cypher = self.generate_cypher()
+        try:
+            cypher = self.generate_cypher()
+        except Exception:
+            raise BulkLoaderException('Bulk Loader cypher error')
 
         try:
             driver = GraphDatabase.driver(host, auth=basic_auth("neo4j", "Pa55w0rd!"))
@@ -39,19 +41,16 @@ class BulkLoader(object):
             session.run(cypher)
 
             session.close()
-
-            self._status['success'] = True
-
-        except Exception as e:
-            self._status['success'] = False
-            self._status['msg'] = e.message
-
-        finally:
-            return self._status
+        except Exception:
+            raise BulkLoaderException('Error loading to database')
 
     def generate_cypher(self):
-        self.generate_node_statements()
-        self.generate_edge_statements()
+
+        try:
+            self.generate_node_statements()
+            self.generate_edge_statements()
+        except Exception as e:
+            raise e
 
         # Put both definitions together and return the create statement.
         return "CREATE %s,%s;\n" % (
@@ -92,3 +91,8 @@ class BulkLoader(object):
             # NOTE: Declare the links by their Cypher node-identifier rather than their Networkx node identifier
             self._edge_statements.append("(%s)-[:%s %s]->(%s)" % (
                 self._node_statements[edge[0]][0], self._rel, edge_attributes, self._node_statements[edge[1]][0]))
+
+
+class BulkLoaderException(Exception):
+    def __init__(self, message):
+        super(BulkLoaderException, self).__init__(message)

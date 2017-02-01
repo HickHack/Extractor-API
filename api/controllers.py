@@ -16,12 +16,12 @@ from api.serialisers import JobSerializer
 def process_linkedin_run(username, password, user_id):
     payload = ResponsePayload('')
 
-    thread = Thread(target=extractor.run_linkedin, args=(username, password))
-    thread.start()
-
     job = Job(user_id=user_id, status='running',
               type=JobType.objects.get(description="LINKEDIN"), start_time=utils.generate_timestamp())
     job.save()
+
+    thread = Thread(target=extractor.run_linkedin, args=(job.id, username, password))
+    thread.start()
 
     data = form_job(job)
     payload.add_job(data)
