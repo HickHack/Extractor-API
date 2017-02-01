@@ -1,19 +1,25 @@
 import json
 import extractor_api.settings as settings
-from . import controllers, utils, auth
+from . import controllers, utils
 from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.viewsets import ViewSet
 from rest_framework.views import APIView
 from api.models import Job
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 
 
 class ExtractorAPI(APIView):
 
-    authentication_classes = (auth.CsrfExemptSessionAuthentication, JSONWebTokenAuthentication)
+    authentication_classes = (JSONWebTokenAuthentication,)
     permission_classes = (IsAuthenticated,)
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super(ExtractorAPI, self).dispatch(request, *args, **kwargs)
 
     def post(self, request):
 

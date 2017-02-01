@@ -49,10 +49,10 @@ class ApiViewsTest(TransactionTestCase):
         self.assertEqual(405, response.status_code)
         self.assertTrue(isinstance(response, JsonResponse))
 
-    def test_run_linkedin_auth_403(self):
+    def test_run_linkedin_auth_401(self):
         response = self.client.post('/api/v1/linkedin', {})
 
-        self.assertEqual(403, response.status_code)
+        self.assertEqual(401, response.status_code)
 
     def test_get_job_by_id_404(self):
         response = self.client.get('/api/v1/job/201', **self.header)
