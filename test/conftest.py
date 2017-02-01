@@ -1,8 +1,8 @@
 """
 This is the test setup file which is
 run before any tests and it used to
-configure django so it can be tested
-using pytest
+configure django so it can be tests
+can be executed using pytest
 """
 
 import os
@@ -11,9 +11,11 @@ from django.conf import settings
 
 # Manually set django settings environment variable
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'extractor_api.settings')
+os.environ['ENV'] = 'TEST'
 
 
 def pytest_configure():
+    settings.ENV = 'TEST'
     settings.DEBUG = False
     settings.DATABASES = {
         'default': {

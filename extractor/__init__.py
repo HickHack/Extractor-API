@@ -1,25 +1,46 @@
 """
 Extractor entry point which is called by
 the api entry point. The service is run on
-a thread
+a thread.
 """
-
-import os
-import extractor.crawlers.linkedin as linkedin
-from extractor.persistence.bulk_loader import BulkLoader
+import api.utils as utils
+from extractor.persistence.bulk_loader import BulkLoader, BulkLoaderException
 from extractor.config import Config
+from api.models import Job
+from extractor_api import settings
+
+is_prod = settings.ENV == 'PROD'
 
 
-def run_linkedin(username, password):
-    if os.environ['ENV'] == 'PROD':
-        graph = linkedin.LinkedInCrawler(username, password).launch()
+def run_linkedin(job_id, username, password):
+    import extractor.crawlers.linkedin as linkedin
 
-        if isinstance(graph, Exception):
-            # TODO log exception
-            print('Crawler Failed')
+    failed = False
+
+    if is_prod:
+        result = linkedin.LinkedInCrawler(username, password).launch()
+        if isinstance(result, Exception):
+            msg = str(result)
+            failed = True
         else:
             loader = BulkLoader()
-            status = loader.load(graph, 'Connection', 'CONNECTED_TO')
 
-            if not status['success']:
-                print('Bulk Load Failure')
+            try:
+                loader.load(result, 'Connection', 'CONNECTED_TO')
+            except BulkLoaderException as e:
+                msg = str(e)
+                failed = True
+
+    if not failed and is_prod:
+        msg = 'Successfully imported'
+    elif not is_prod:
+        msg = 'Extractor did not run, environment not production'
+        failed = True
+
+    Job.update(job_id=job_id, status=msg, is_complete=True,
+               is_success=not failed, end_time=utils.generate_timestamp())
+
+
+
+
+

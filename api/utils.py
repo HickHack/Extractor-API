@@ -38,7 +38,7 @@ def bad_request(request):
 
 
 def generate_timestamp():
-    return int(round(time.time() * 1000))
+    return round(time.time())
 
 
 class ResponsePayload(object):
@@ -49,6 +49,9 @@ class ResponsePayload(object):
 
     def add_job(self, job):
         self.jobs.append(job)
+
+
+
 
 
 
