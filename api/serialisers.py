@@ -5,7 +5,7 @@ from api.models import Job, JobType
 class JobSerializer(serializers.ModelSerializer):
     class Meta:
         model = Job
-        fields = ('id', 'user_id', 'status', 'type', 'complete',
+        fields = ('id', 'user_id', 'name', 'status', 'type', 'complete',
                   'success', 'start_time', 'end_time', 'total_time')
 
 

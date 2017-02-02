@@ -140,6 +140,16 @@ DATABASES = {
     }
 }
 
+NEO4J = {
+    'default': {
+        'NAME': 'graph.db',
+        'USERNAME': 'neo4j',
+        'PASSWORD': 'neo4j',
+        'HOST': '127.0.0.1',
+        'PORT': '7687'
+    }
+}
+
 # Password validation
 # https://docs.djangoproject.com/en/1.10/ref/settings/#auth-password-validators
 

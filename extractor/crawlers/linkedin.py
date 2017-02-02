@@ -9,9 +9,9 @@ import time
 import urllib
 
 from json.decoder import JSONDecodeError
-import matplotlib.pyplot as plt
 import networkx as nx
 from bs4 import BeautifulSoup
+from random import randint
 
 import extractor.config as conf
 from extractor.model.linkedin import Connection
@@ -37,6 +37,7 @@ class LinkedInCrawler(object):
         self.cookie_jar = cookielib.MozillaCookieJar(os.path.dirname(os.path.realpath(__file__)) + cookie_filename)
         self.opener = None
         self.G = Graph()
+        self.root_id = 0
 
     def launch(self):
         # Simulate browser
@@ -56,7 +57,8 @@ class LinkedInCrawler(object):
             self.load_shared_connections(connection.member_id)
             self.pos += 1
 
-        return self.G.get_graph()
+        self.G.write_to_file()
+        return self.G.get_graph(), self.root_id
 
         # TODO: Delete cookies file after crawl
 
@@ -134,14 +136,17 @@ class LinkedInCrawler(object):
     """
     def load_seed(self):
         soup = self.load_soup("http://www.linkedin.com/nhome")
-        code = soup.find(id="ozidentity-templates/identity-content")
+        profile_data = soup.find(id="ozidentity-templates/identity-content")
+        member_id_data = soup.find(id="sharebox-static/templates/share-content")
 
         try:
-            content = json.loads(code.contents[0])
+            content = json.loads(profile_data.contents[0])
+            member_id_content = json.loads(member_id_data.contents[0])
         except Exception:
             raise NoDataException('No seed data found')
 
         try:
+            self.root_id = int(member_id_content['memberInfo']['id']) if 'id' in member_id_content['memberInfo'] else randint(0, 8000)
             name = content['member']['name']['fullName'] if 'fullName' in content['member']['name'] else ' '
             title = content['member']['headline']['text'] if 'text' in content['member']['headline'] else ' '
             profile_image_url = config['cdn_url'] + content['member']['picture']['id'] if 'id' in content['member']['picture'] else ' '
@@ -152,10 +157,11 @@ class LinkedInCrawler(object):
         except KeyError:
             raise ParseException('Error Parsing Seed')
 
-        root = Connection('R', name, title,
+        root = Connection(self.root_id, name, title,
                           ' ', ' ', ' ',
                           ' ', ' ', ' ',
-                          profile_image_url, profile_url)
+                          profile_image_url, profile_url, True)
+
         self.network = [root]
         self.G.add_node(root.name, root.__dict__)
 
@@ -271,13 +277,6 @@ class Graph(object):
     # Returns true is exists
     def does_node_exist(self, n):
         return n in self._G.nodes()
-
-    def draw(self):
-        graph_pos = nx.spring_layout(self._G)
-
-        nx.draw(self._G, graph_pos, node_color='#A0CBE2',
-                edge_color='#B0C23E', width=2, edge_cmap=plt.cm.Blues, with_labels=True)
-        plt.show()
 
     def write_to_file(self):
         nx.write_graphml(self._G, os.path.dirname(os.path.realpath(__file__)) + '/data/linkedin.graphml')

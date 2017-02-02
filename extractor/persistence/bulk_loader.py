@@ -9,7 +9,6 @@ Available at: https://gist.github.com/aanastasiou/6099561
 """
 
 import random
-from neo4j.v1 import GraphDatabase, basic_auth
 
 letter_dct = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 num_dct = "0123456789"
@@ -24,33 +23,25 @@ class BulkLoader(object):
         self._label = None
         self._rel = None
 
-    def load(self, graph, label, rel='KNOWS', host='bolt://localhost:7687'):
+    def get_query(self, graph, label, rel='KNOWS'):
         self._graph = graph
         self._label = label
         self._rel = rel
 
         try:
             cypher = self.generate_cypher()
-        except Exception:
-            raise BulkLoaderException('Bulk Loader cypher error')
+        except BulkLoaderException as e:
+            raise e
 
-        try:
-            driver = GraphDatabase.driver(host, auth=basic_auth("neo4j", "Pa55w0rd!"))
-            session = driver.session()
-
-            session.run(cypher)
-
-            session.close()
-        except Exception:
-            raise BulkLoaderException('Error loading to database')
+        return cypher
 
     def generate_cypher(self):
 
         try:
             self.generate_node_statements()
             self.generate_edge_statements()
-        except Exception as e:
-            raise e
+        except Exception:
+            raise BulkLoaderException('Failed to run bulk loader')
 
         # Put both definitions together and return the create statement.
         return "CREATE %s,%s;\n" % (

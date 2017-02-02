@@ -11,7 +11,8 @@ class Connection(object):
     def __init__(self, member_id, name,
                  title, company, email,
                  phone, location, connection_date,
-                 member_since, profile_image_url, profile_url):
+                 member_since, profile_image_url, profile_url,
+                 is_root=False):
 
         self.member_id = member_id
         self.name = self.clean(name)
@@ -24,6 +25,7 @@ class Connection(object):
         self.member_since = member_since
         self.profile_image_url = base64.b64encode(profile_image_url.encode('utf-8')).decode('utf-8')
         self.profile_url = base64.b64encode(profile_url.encode('utf-8')).decode('utf-8')
+        self.is_root = is_root
         self.connections = []
 
     def addConnection(self, node):

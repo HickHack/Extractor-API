@@ -8,6 +8,7 @@ class JobType(models.Model):
 
 class Job(models.Model):
     user_id = models.IntegerField()
+    name = models.CharField(max_length=300, default='')
     status = models.CharField(max_length=100)
     complete = models.BooleanField(default=False)
     success = models.BooleanField(default=False)
