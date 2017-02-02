@@ -20,7 +20,7 @@ def process_linkedin_run(username, password, user_id):
               type=JobType.objects.get(description="LINKEDIN"), start_time=utils.generate_timestamp())
     job.save()
 
-    thread = Thread(target=extractor.run_linkedin, args=(job.id, username, password))
+    thread = Thread(target=extractor.run_linkedin, args=(job, username, password))
     thread.start()
 
     data = form_job(job)

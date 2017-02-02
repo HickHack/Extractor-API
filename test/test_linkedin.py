@@ -27,7 +27,7 @@ class LinkedInCrawlerTest(unittest.TestCase):
         self.assertTrue(mock_urllib.request.HTTPCookieProcessor.called)
         self.assertTrue(mock_urllib.request.HTTPCookieProcessor.called)
         self.assertListEqual(mock_urllib.request.build_opener().addheaders, header)
-        self.assertFalse(mock_cookielib.load.called)
+        self.assertFalse(mock_cookielib.get_query.called)
 
     @mock.patch('extractor.crawlers.linkedin.os')
     @mock.patch('extractor.crawlers.linkedin.cookielib')
