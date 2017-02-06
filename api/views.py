@@ -25,15 +25,16 @@ class ExtractorAPI(APIView):
 
         try:
             data = json.loads(request.body.decode('utf-8'))
+            name = data['name']
             username = data['username']
             password = data['password']
             user_id = int(data['user_id'])
         except Exception:
             payload = utils.ResponsePayload('')
-            payload.message = 'Valid LinkedIn username and password, and exograph user_id is required'
+            payload.message = 'Valid LinkedIn username, password and name required.'
             return JsonResponse(payload.__dict__, status=status.HTTP_400_BAD_REQUEST)
 
-        payload = controllers.process_linkedin_run(username, password, user_id)
+        payload = controllers.process_linkedin_run(name, username, password, user_id)
 
         return JsonResponse(payload.__dict__, status=status.HTTP_200_OK)
 
