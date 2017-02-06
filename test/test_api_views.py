@@ -32,7 +32,7 @@ class ApiViewsTest(TransactionTestCase):
         self.assertTrue(isinstance(response, JsonResponse))
 
     def test_run_linkedin_post(self):
-        payload = '{"username": "someusername", "password": "somepassword", "user_id": 1}'
+        payload = '{"name": "a name", "username": "someusername", "password": "somepassword", "user_id": 1}'
 
         response = self.client.post('/api/v1/linkedin', payload, content_type='text/plain;charset=UTF-8', **self.header)
 
