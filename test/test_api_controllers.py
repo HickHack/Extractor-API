@@ -14,7 +14,7 @@ class TestAPIControllers(TestCase):
     @mock.patch('api.controllers.JobType')
     @mock.patch('api.controllers.Thread')
     def test_process_linkedin_run(self, mock_thread, mock_job_type, mock_job):
-        result = controllers.process_linkedin_run('username', 'password', 'user_id')
+        result = controllers.process_linkedin_run('name', 'username', 'password', 'user_id')
 
         self.assertTrue(mock_thread.called)
         self.assertTrue(mock_job.called)
