@@ -29,13 +29,13 @@ class Driver(object):
 
         session.run(social_graph_query)
 
-        session.run('CREATE (a:SubGraph {name: {name}, job_id: {job_id},'
-                    'created_time: {created_time}, no_connections: {no_connections},'
-                    'type: {type}})',
+        session.run('CREATE (a:Network {name: {name}, job_id: {job_id}, '
+                    'created_time: {created_time}, no_connections: {no_connections}, '
+                    'type: {type}, image_ref: {image_file}, is_trash: {is_trash}})',
                     attr_dict)
 
         session.run('MATCH (u:User) WHERE id(u)= {user_id}'
-                    'OPTIONAL MATCH (g:SubGraph {job_id: {job_id}}) '
+                    'OPTIONAL MATCH (g:Network {job_id: {job_id}}) '
                     'OPTIONAL MATCH (c:Connection {member_id: {root_id}}) '
                     'CREATE (u)-[:OWNS]->(g)-[:CONTAINS]->(c)',
                     {'user_id': user_id, 'job_id': attr_dict['job_id'], 'root_id': root_id})

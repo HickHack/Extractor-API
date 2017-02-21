@@ -48,7 +48,7 @@ class LinkedInCrawler(object):
             self.load_seed()
             self.load_contacts()
         except Exception as e:
-            return e
+            return e, self.root_id
 
         # Start fetching all shared contacts
         for connection in self.network[0].connections:
@@ -134,6 +134,7 @@ class LinkedInCrawler(object):
     """
     Fetches the root node which the account of root node
     """
+
     def load_seed(self):
         soup = self.load_soup("http://www.linkedin.com/nhome")
         profile_data = soup.find(id="ozidentity-templates/identity-content")
@@ -146,10 +147,12 @@ class LinkedInCrawler(object):
             raise NoDataException('No seed data found')
 
         try:
-            self.root_id = int(member_id_content['memberInfo']['id']) if 'id' in member_id_content['memberInfo'] else randint(0, 8000)
+            self.root_id = int(member_id_content['memberInfo']['id']) if 'id' in member_id_content[
+                'memberInfo'] else randint(0, 8000)
             name = content['member']['name']['fullName'] if 'fullName' in content['member']['name'] else ' '
             title = content['member']['headline']['text'] if 'text' in content['member']['headline'] else ' '
-            profile_image_url = config['cdn_url'] + content['member']['picture']['id'] if 'id' in content['member']['picture'] else ' '
+            profile_image_url = config['cdn_url'] + content['member']['picture']['id'] if 'id' in content['member'][
+                'picture'] else ' '
 
             url = soup.find('ul', {'class': "main-nav"}).findAll('a')[1]['href']
             profile_url = url if url is not None else ' '
@@ -158,8 +161,8 @@ class LinkedInCrawler(object):
             raise ParseException('Error Parsing Seed')
 
         root = Connection(self.root_id, name, title,
-                          ' ', ' ', ' ',
-                          ' ', ' ', ' ',
+                          '', '', '',
+                          '', '', '',
                           profile_image_url, profile_url, True)
 
         self.network = [root]
@@ -186,24 +189,28 @@ class LinkedInCrawler(object):
         self.cookie_jar.save()
 
     def load_contacts(self):
-        count = 10
-        start = 0
+        count = 150
+        offset = 0
 
-        # Make initial request for 10 items
-        data = self.request_json(contacts_url % (start, count))
+        # Make initial request for 150 items
+        data = self.request_json(contacts_url % (offset, count))
 
-        if ('values' not in data) or ('paging' not in data):
-            raise ParseException('No data to start crawl')
-
-        total = data['paging']['total']
-
-        if total <= 200:
-            # Request all in one swoop
-            data = self.request_json(contacts_url % (start, total))
+        if self.has_contacts(data):
+            num_contacts = data['paging']['total']
             self.parse_contacts(data)
-        else:
-            # TODO: Add Paging
-            print('')
+            total_fetched = len(self.network[0].connections)
+
+            while offset < num_contacts and total_fetched < num_contacts:
+                offset = total_fetched
+                data = self.request_json(contacts_url % (offset, count))
+
+                if self.has_contacts(data):
+                    self.parse_contacts(data)
+                total_fetched = len(self.network[0].connections)
+
+    @staticmethod
+    def has_contacts(data):
+        return ('values' in data) and ('paging' in data)
 
     def load_shared_connections(self, member_id):
         count = 10
@@ -216,18 +223,18 @@ class LinkedInCrawler(object):
 
         if data is not None and self.has_shared_connections(data):
             self.parse_shared_connections(data)
-            total = len(self.network[0].connections[self.pos].connections)
+            total_fetched = len(self.network[0].connections[self.pos].connections)
 
             num_shared = data['content']['connections']['numShared']
 
             if num_shared > 10:
-                while offset < num_shared and total < num_shared:
+                while offset < num_shared and total_fetched < num_shared:
                     offset += 10
                     data = self.request_json(shared_connections_url % (member_id, offset, count))
 
                     if data is not None and self.has_shared_connections(data):
                         self.parse_shared_connections(data)
-                    total = len(self.network[0].connections[self.pos].connections)
+                    total_fetched = len(self.network[0].connections[self.pos].connections)
 
     @staticmethod
     def has_shared_connections(data):
@@ -306,6 +313,3 @@ class ParseException(Exception):
 class NoDataException(Exception):
     def __init__(self, message):
         super(NoDataException, self).__init__(message)
-
-
-

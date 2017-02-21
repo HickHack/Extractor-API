@@ -20,4 +20,7 @@ class Config(object):
     def neo4j(self):
         return self.config['NEO4J']
 
+    def general(self):
+        return self.config['GENERAL']
+
 

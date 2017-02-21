@@ -14,7 +14,7 @@ def custom_exception_handler(exc, context):
 
     res = ResponsePayload(detail)
 
-    return JsonResponse(res.__dict__, status=exc.status_code)
+    return JsonResponse(res.__dict__)
 
 
 def server_error(request):
@@ -46,9 +46,11 @@ class ResponsePayload(object):
     def __init__(self, message):
         self.message = message
         self.jobs = []
+        self.count = 0
 
     def add_job(self, job):
         self.jobs.append(job)
+        self.count += 1
 
 
 
