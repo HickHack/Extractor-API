@@ -1,1 +1,1 @@
-[![Build Status](https://travis-ci.org/HickHack/extractor.svg?branch=master)](https://travis-ci.org/HickHack/extractor)
+[![Build Status](https://travis-ci.org/HickHack/Extractor-API.svg?branch=master)](https://travis-ci.org/HickHack/Extractor-API)
