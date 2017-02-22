@@ -30,7 +30,7 @@ def run_linkedin(job, username, password):
             image_gen = ImageGenerator(graph)
             driver = Driver()
             network = Network(job.name, job.id, utils.generate_timestamp(),
-                              193, job.type.description, image_gen.get_image_ref())
+                              len(graph.nodes()), job.type.description, image_gen.get_image_ref())
             try:
                 query = loader.get_query(graph, 'Connection', 'CONNECTED_TO')
                 driver.link_graph_to_user(job.user_id, root_id, network.__dict__, query)

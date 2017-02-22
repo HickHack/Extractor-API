@@ -14,7 +14,12 @@ def custom_exception_handler(exc, context):
 
     res = ResponsePayload(detail)
 
-    return JsonResponse(res.__dict__)
+    if exc.status_code:
+        status = exc.status_code
+    else:
+        status = 500
+
+    return JsonResponse(res.__dict__, status=status)
 
 
 def server_error(request):

@@ -11,8 +11,6 @@ from threading import Thread
 from api.models import JobType, Job
 from api.utils import ResponsePayload
 from api.serialisers import JobSerializer
-from extractor.image_generator import ImageGenerator
-from extractor.crawlers.linkedin import LinkedInCrawler
 
 
 def process_linkedin_run(name, username, password, user_id):
@@ -42,7 +40,7 @@ def process_get_job_by_id(pk):
     return payload
 
 
-def process_get_job_by_user_id(user_id, count):
+def process_get_job_by_user_id(user_id, count=-1):
     payload = ResponsePayload('')
 
     if count == -1:
