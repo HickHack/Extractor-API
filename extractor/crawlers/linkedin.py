@@ -138,17 +138,14 @@ class LinkedInCrawler(object):
     def load_seed(self):
         soup = self.load_soup("http://www.linkedin.com/nhome")
         profile_data = soup.find(id="ozidentity-templates/identity-content")
-        member_id_data = soup.find(id="sharebox-static/templates/share-content")
 
         try:
             content = json.loads(profile_data.contents[0])
-            member_id_content = json.loads(member_id_data.contents[0])
         except Exception:
             raise NoDataException('No seed data found')
 
         try:
-            self.root_id = int(member_id_content['memberInfo']['id']) if 'id' in member_id_content[
-                'memberInfo'] else randint(0, 8000)
+            self.root_id = int(time.time()) + randint(0, 1000)
             name = content['member']['name']['fullName'] if 'fullName' in content['member']['name'] else ' '
             title = content['member']['headline']['text'] if 'text' in content['member']['headline'] else ' '
             profile_image_url = config['cdn_url'] + content['member']['picture']['id'] if 'id' in content['member'][
