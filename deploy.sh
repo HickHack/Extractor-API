@@ -1,4 +1,6 @@
 function init() {
+    chmod +x ./dependencies
+    sudo mysql -u root -p < setup.sql
     ./dependencies
     launch
 }
