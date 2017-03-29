@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 import os
 import datetime
 
-ENV = 'DEV'
+ENV = 'PROD'
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -111,12 +111,12 @@ JWT_AUTH = {
     'JWT_VERIFY': True,
     'JWT_VERIFY_EXPIRATION': True,
     'JWT_LEEWAY': 0,
-    'JWT_EXPIRATION_DELTA': datetime.timedelta(minutes=30),
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(minutes=5, seconds=20),
     'JWT_AUDIENCE': None,
     'JWT_ISSUER': None,
 
     'JWT_ALLOW_REFRESH': True,
-    'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=7),
+    'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(minutes=5, seconds=20),
 
     'JWT_AUTH_HEADER_PREFIX': 'Bearer',
 }
@@ -130,7 +130,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'extractor_service',
-        'USER': 'root',
+        'USER': 'django',
         'PASSWORD': '',
         'HOST': '127.0.0.1',
         'PORT': '3306',

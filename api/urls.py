@@ -7,6 +7,7 @@ urlpatterns = [
     url(r'^linkedin$', ExtractorAPI.as_view(), name='linkedin'),
     url(r'^job/(?P<pk>[0-9]+)$', JobsAPI.as_view({'get': 'get_by_id'})),
     url(r'^job/user/(?P<user_id>[0-9]+)$', JobsAPI.as_view({'get': 'get_by_user_id'}), name='jobs_by_user'),
+    url(r'^job/summary/(?P<user_id>[0-9]+)$', JobsAPI.as_view({'get': 'get_by_user_id'}), name='jobs_by_user'),
     url(r'^endpoints$', JobsAPI.as_view({'get': 'publish_endpoints'})),
     url(r'^api-token-auth$', obtain_jwt_token, name='obtain_auth_token'),
     url(r'^api-token-refresh$', refresh_jwt_token, name='api_token_refresh'),
