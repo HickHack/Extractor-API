@@ -70,9 +70,23 @@ class JobsAPI(ViewSet):
         except ValueError:
             count = 0
 
-        payload = controllers.process_get_job_by_user_id(user_id, count);
+        payload = controllers.process_get_job_by_user_id(user_id, count)
 
         return JsonResponse(data=payload.__dict__, status=status.HTTP_200_OK)
+
+    """
+    Get Job Summary
+    """
+    def get_summary(self, request, user_id, format=None):
+        print('')
+        # try:
+        #
+        # except ValueError:
+        #     count = 0
+        #
+        # payload = controllers.process_get_job_by_user_id(user_id, count)
+        #
+        # return JsonResponse(data=payload.__dict__, status=status.HTTP_200_OK)
 
     def publish_endpoints(self, request, format=None):
         return JsonResponse(data=settings.ENDPOINTS, status=status.HTTP_200_OK)
