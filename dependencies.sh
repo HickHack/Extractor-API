@@ -24,7 +24,9 @@ function setupPython() {
 }
 
 function packageInstall() {
-    pip3 install --upgrade -r ~/Extractor-API/requirements.txt
+    cd ~/Extractor-API/
+    pip3 install --upgrade -r requirements.txt
+    cd ../
 }
 
 init
