@@ -9,12 +9,12 @@ import extractor
 import api.utils as utils
 from threading import Thread
 from api.models import JobType, Job
-from api.utils import ResponsePayload
+from api.utils import ResponsePayload, JobsSummary
 from api.serialisers import JobSerializer
 
 
 def process_linkedin_run(name, username, password, user_id):
-    payload = ResponsePayload('')
+    payload = ResponsePayload()
 
     job = Job(user_id=user_id, status='running',
               type=JobType.objects.get(description="LINKEDIN"), start_time=utils.generate_timestamp(),
@@ -31,7 +31,7 @@ def process_linkedin_run(name, username, password, user_id):
 
 
 def process_get_job_by_id(pk):
-    payload = ResponsePayload('')
+    payload = ResponsePayload()
 
     job = Job.objects.get(pk=pk)
     data = form_job(job)
@@ -41,7 +41,7 @@ def process_get_job_by_id(pk):
 
 
 def process_get_job_by_user_id(user_id, count=-1):
-    payload = ResponsePayload('')
+    payload = ResponsePayload()
 
     if count == -1:
         jobs_set = Job.objects.all().filter(user_id=user_id)
@@ -62,3 +62,13 @@ def form_job(job):
     data['type'] = job.type.description
 
     return data
+
+
+def process_get_user_job_summary(user_id):
+    running_count = Job.objects.all().filter(user_id=user_id, complete=False).count()
+
+    summary = JobsSummary(user_id=user_id, warning_count=3, running_count=running_count)
+    payload = ResponsePayload(summary=summary)
+
+    return payload
+

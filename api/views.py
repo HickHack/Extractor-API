@@ -30,7 +30,7 @@ class ExtractorAPI(APIView):
             password = data['password']
             user_id = int(data['user_id'])
         except Exception:
-            payload = utils.ResponsePayload('')
+            payload = utils.ResponsePayload()
             payload.message = 'Valid LinkedIn username, password and name required.'
             return JsonResponse(payload.__dict__, status=status.HTTP_400_BAD_REQUEST)
 
@@ -52,7 +52,7 @@ class JobsAPI(ViewSet):
         try:
             payload = controllers.process_get_job_by_id(pk)
         except Job.DoesNotExist:
-            payload_failed = utils.ResponsePayload('Job with id: %s not found' % pk)
+            payload_failed = utils.ResponsePayload(message='Job with id: %s not found' % pk)
             return JsonResponse(data=payload_failed.__dict__, status=status.HTTP_404_NOT_FOUND)
 
         return JsonResponse(data=payload.__dict__, status=status.HTTP_200_OK)
@@ -78,15 +78,10 @@ class JobsAPI(ViewSet):
     Get Job Summary
     """
     def get_summary(self, request, user_id, format=None):
-        print('')
-        # try:
-        #
-        # except ValueError:
-        #     count = 0
-        #
-        # payload = controllers.process_get_job_by_user_id(user_id, count)
-        #
-        # return JsonResponse(data=payload.__dict__, status=status.HTTP_200_OK)
+
+        payload = controllers.process_get_user_job_summary(user_id)
+
+        return JsonResponse(data=payload.__dict__, status=status.HTTP_200_OK)
 
     def publish_endpoints(self, request, format=None):
         return JsonResponse(data=settings.ENDPOINTS, status=status.HTTP_200_OK)

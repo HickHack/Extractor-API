@@ -25,6 +25,7 @@ contacts_url = config['contacts_url']
 all_connections_url = config['all_connections_url']
 shared_connections_url = config['shared_connections_url']
 
+
 class LinkedInCrawler(object):
     def __init__(self, username, password):
         self.username = username

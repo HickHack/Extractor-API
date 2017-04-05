@@ -48,14 +48,27 @@ def generate_timestamp():
 
 class ResponsePayload(object):
 
-    def __init__(self, message):
+    def __init__(self, message='', summary=None):
         self.message = message
         self.jobs = []
         self.count = 0
 
+        if isinstance(summary, JobsSummary):
+            self.summary = summary.__dict__
+        else:
+            self.summary = summary
+
     def add_job(self, job):
         self.jobs.append(job)
         self.count += 1
+
+
+class JobsSummary(object):
+
+    def __init__(self, user_id, warning_count, running_count):
+        self.user_id = user_id
+        self.warning_count = warning_count
+        self.running_count = running_count
 
 
 
