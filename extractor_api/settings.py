@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 import os
 import datetime
 
-ENV = 'PROD'
+ENV = 'DEV'
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -194,6 +194,7 @@ ENDPOINTS = {
     'endpoints': '%s://%s:%d/api/v1/endpoints' % (SCHEME, HOST, PORT),
     'job_by_id': '%s://%s:%d/api/v1/job/<id>' % (SCHEME, HOST, PORT),
     'job_by_user_id': '%s://%s:%d/api/v1/job/user/' % (SCHEME, HOST, PORT),
+    'job_user_summary': '%s://%s:%d/api/v1/job/user/<user_id>/summary' % (SCHEME, HOST, PORT),
     'run_linkedin': '%s://%s:%d/api/v1/linkedin' % (SCHEME, HOST, PORT),
     'api_token_auth': '%s://%s:%d/api/v1/api-token-auth' % (SCHEME, HOST, PORT),
     'api_token_refresh': '%s://%s:%d/api/v1/api-token-refresh' % (SCHEME, HOST, PORT),
