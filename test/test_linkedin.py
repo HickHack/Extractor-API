@@ -1,7 +1,7 @@
 import unittest
 import mock
 from bs4 import BeautifulSoup
-from extractor.crawlers.linkedin import LinkedInCrawler
+from extractor.crawlers.linkedin.linkedin import LinkedInCrawler
 
 
 class LinkedInCrawlerTest(unittest.TestCase):
