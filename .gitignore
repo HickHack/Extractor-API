@@ -3,8 +3,8 @@ twitter_followers.txt
 __pycache__
 *parser.cookies.txt
 *.json
-extractor/linkedin/data/
 *.sqlite3
 extractor/crawlers/data/linkedin
 .cache
 *.pyc
+data

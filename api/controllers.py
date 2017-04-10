@@ -30,6 +30,23 @@ def process_linkedin_run(name, username, password, user_id):
     return payload
 
 
+def process_twitter_run(name, user_id, screen_name):
+    payload = ResponsePayload()
+
+    job = Job(user_id=user_id, status='running',
+              type=JobType.objects.get(description="TWITTER"), start_time=utils.generate_timestamp(),
+              name=name)
+    job.save()
+
+    thread = Thread(target=extractor.run_twitter, args=(job, screen_name))
+    thread.start()
+
+    data = form_job(job)
+    payload.add_job(data)
+
+    return payload
+
+
 def process_get_job_by_id(pk):
     payload = ResponsePayload()
 

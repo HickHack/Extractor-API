@@ -1,13 +1,13 @@
 import matplotlib as plt
 import matplotlib.pyplot as plt
 import networkx as nx
-import extractor.config as conf
+import extractor.settings as settings
 import string
 import random
 import time
+import os
 
-config = conf.Config()
-image_path = config.general()['image_path']
+image_path = settings.GENERAL['generated_image_path']
 
 
 class ImageGenerator(object):
@@ -34,7 +34,7 @@ class ImageGenerator(object):
         nx.draw(self._graph, graph_pos, node_color='#A0CBE2',
                 edge_color='#B0C23E', width=2, edge_cmap=plt.cm.Blues, with_labels=False, block=False)
 
-        plt.savefig(image_path + '/' + self._filename, format="PNG", transparent=True)
+        plt.savefig(os.path.join(image_path, self._filename), format="PNG", transparent=True)
 
     def _configure_plot(self):
         plt.show(block=False)

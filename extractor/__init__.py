@@ -4,20 +4,20 @@ the api entry point. The service is run on
 a thread.
 """
 import api.utils as utils
+import extractor_api.settings as config
 from extractor.persistence.bulk_loader import BulkLoader, BulkLoaderException
-from extractor.config import Config
 from api.models import Job
-from extractor_api import settings
 from extractor.persistence.connector import Driver
 from extractor.model.network import Network
 from extractor.image_generator import ImageGenerator
+from extractor.crawlers.twitter import get_friends, twitter_network
 
-is_prod = settings.ENV == 'PROD'
+is_prod = config.ENV == 'PROD'
 
 
 def run_linkedin(job, username, password):
-    import extractor.crawlers.linkedin as linkedin
-
+    import extractor.crawlers.linkedin.linkedin as linkedin
+    msg = ''
     failed = False
 
     if is_prod:
@@ -38,6 +38,27 @@ def run_linkedin(job, username, password):
                 msg = str(e)
                 failed = True
 
+    on_complete(job, failed, msg)
+
+
+def run_twitter(job, screen_name):
+    msg = ''
+    failed = False
+
+    if is_prod:
+
+        try:
+            seed_id = get_friends.run(screen_name)
+            graph = twitter_network.generate_graph(seed_id=seed_id)
+            print('done')
+        except Exception as error:
+            msg = str(error)
+            failed = True
+
+    on_complete(job, failed, msg)
+
+
+def on_complete(job, failed, msg):
     if not failed and is_prod:
         msg = 'Successfully imported'
     elif not is_prod:
