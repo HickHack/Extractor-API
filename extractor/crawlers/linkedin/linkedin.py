@@ -13,17 +13,17 @@ import networkx as nx
 from bs4 import BeautifulSoup
 from random import randint
 
-import extractor.config as conf
+import extractor.settings as settings
 from extractor.model.linkedin import Connection
 
-config = conf.Config().linkedIn()
-cookie_filename = config['cookie_file']
-wait = int(config['request_throttle'])
-retry_limit = int(config['retry_limit'])
+config = settings.LINKEDIN
+cookie_filename = config['cache']['cookie_file']
+wait = config['limits']['request_throttle']
+retry_limit = config['limits']['retry_limit']
 
-contacts_url = config['contacts_url']
-all_connections_url = config['all_connections_url']
-shared_connections_url = config['shared_connections_url']
+contacts_url = config['urls']['contacts_url']
+all_connections_url = config['urls']['all_connections_url']
+shared_connections_url = config['urls']['shared_connections_url']
 
 
 class LinkedInCrawler(object):
@@ -148,7 +148,7 @@ class LinkedInCrawler(object):
             self.root_id = int(time.time()) + randint(0, 1000)
             name = content['member']['name']['fullName'] if 'fullName' in content['member']['name'] else ' '
             title = content['member']['headline']['text'] if 'text' in content['member']['headline'] else ' '
-            profile_image_url = config['cdn_url'] + content['member']['picture']['id'] if 'id' in content['member'][
+            profile_image_url = config['urls']['cdn_url'] + content['member']['picture']['id'] if 'id' in content['member'][
                 'picture'] else ' '
 
             url = soup.find('ul', {'class': "main-nav"}).findAll('a')[1]['href']
@@ -180,7 +180,7 @@ class LinkedInCrawler(object):
 
         response = self.request("https://www.linkedin.com/uas/login-submit", login_data)
 
-        if response.url != config['home_url']:
+        if response.url != config['urls']['home_url']:
             raise LoginException('Login Failed')
 
         self.cookie_jar.save()
