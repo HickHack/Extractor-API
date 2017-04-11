@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 import os
 import datetime
 
-ENV = 'DEV'
+ENV = 'PROD'
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -140,16 +140,6 @@ DATABASES = {
     }
 }
 
-NEO4J = {
-    'default': {
-        'NAME': 'graph.db',
-        'USERNAME': 'neo4j',
-        'PASSWORD': 'neo4j',
-        'HOST': '127.0.0.1',
-        'PORT': '7687'
-    }
-}
-
 # Password validation
 # https://docs.djangoproject.com/en/1.10/ref/settings/#auth-password-validators
 
@@ -196,6 +186,7 @@ ENDPOINTS = {
     'job_by_user_id': '%s://%s:%d/api/v1/job/user/' % (SCHEME, HOST, PORT),
     'job_user_summary': '%s://%s:%d/api/v1/job/user/<user_id>/summary' % (SCHEME, HOST, PORT),
     'run_linkedin': '%s://%s:%d/api/v1/linkedin' % (SCHEME, HOST, PORT),
+    'run_twitter': '%s://%s:%d/api/v1/twitter' % (SCHEME, HOST, PORT),
     'api_token_auth': '%s://%s:%d/api/v1/api-token-auth' % (SCHEME, HOST, PORT),
     'api_token_refresh': '%s://%s:%d/api/v1/api-token-refresh' % (SCHEME, HOST, PORT),
 }

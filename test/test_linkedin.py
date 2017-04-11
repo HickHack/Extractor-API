@@ -6,9 +6,9 @@ from extractor.crawlers.linkedin.linkedin import LinkedInCrawler
 
 class LinkedInCrawlerTest(unittest.TestCase):
 
-    @mock.patch('extractor.crawlers.linkedin.os')
-    @mock.patch('extractor.crawlers.linkedin.urllib')
-    @mock.patch('extractor.crawlers.linkedin.cookielib')
+    @mock.patch('extractor.crawlers.linkedin.linkedin.os')
+    @mock.patch('extractor.crawlers.linkedin.linkedin.urllib')
+    @mock.patch('extractor.crawlers.linkedin.linkedin.cookielib')
     def test_configure_opener_file_not_exist(self, mock_cookielib,
                                              mock_urllib, mock_os):
         reference = LinkedInCrawler('', '')
@@ -29,8 +29,8 @@ class LinkedInCrawlerTest(unittest.TestCase):
         self.assertListEqual(mock_urllib.request.build_opener().addheaders, header)
         self.assertFalse(mock_cookielib.get_query.called)
 
-    @mock.patch('extractor.crawlers.linkedin.os')
-    @mock.patch('extractor.crawlers.linkedin.cookielib')
+    @mock.patch('extractor.crawlers.linkedin.linkedin.os')
+    @mock.patch('extractor.crawlers.linkedin.linkedin.cookielib')
     def test_configure_opener_file_load(self, mock_cookielib, mock_os):
         reference = LinkedInCrawler('', '')
 
@@ -41,8 +41,8 @@ class LinkedInCrawlerTest(unittest.TestCase):
         self.assertTrue(mock_os.access.called)
         self.assertTrue(mock_cookielib.MozillaCookieJar.called)
 
-    @mock.patch('extractor.crawlers.linkedin.urllib')
-    @mock.patch('extractor.crawlers.linkedin.time')
+    @mock.patch('extractor.crawlers.linkedin.linkedin.urllib')
+    @mock.patch('extractor.crawlers.linkedin.linkedin.time')
     def test_request_with_no_data_GET(self, mock_time, mock_urllib):
         reference = LinkedInCrawler('', '')
 
@@ -56,8 +56,8 @@ class LinkedInCrawlerTest(unittest.TestCase):
         self.assertEqual(response, 'some response')
         self.assertEqual(1, reference.total_requests)
 
-    @mock.patch('extractor.crawlers.linkedin.urllib')
-    @mock.patch('extractor.crawlers.linkedin.time')
+    @mock.patch('extractor.crawlers.linkedin.linkedin.urllib')
+    @mock.patch('extractor.crawlers.linkedin.linkedin.time')
     def test_request_with_data_POST(self, mock_time, mock_urllib):
         reference = LinkedInCrawler('', '')
 
@@ -71,7 +71,7 @@ class LinkedInCrawlerTest(unittest.TestCase):
         self.assertEqual(response, 'some response')
         self.assertEqual(1, reference.total_requests)
 
-    @mock.patch('extractor.crawlers.linkedin.urllib')
+    @mock.patch('extractor.crawlers.linkedin.linkedin.urllib')
     def test_request_failure_with_data_POST(self, mock_urllib):
         reference = LinkedInCrawler('', '')
 

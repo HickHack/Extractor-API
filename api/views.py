@@ -25,7 +25,7 @@ class LinkedInView(APIView):
 
         try:
             data = json.loads(request.body.decode('utf-8'))
-            name = data['name']
+            name = data['graph_name']
             username = data['username']
             password = data['password']
             user_id = int(data['user_id'])
@@ -52,7 +52,7 @@ class TwitterView(APIView):
 
         try:
             data = json.loads(request.body.decode('utf-8'))
-            name = data['name']
+            name = data['graph_name']
             screen_name = data['screen_name']
             user_id = int(data['user_id'])
         except Exception:
