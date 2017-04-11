@@ -5,11 +5,9 @@ a thread.
 """
 import api.utils as utils
 import extractor_api.settings as config
-from extractor.persistence.bulk_loader import BulkLoader, BulkLoaderException
+import extractor.persistence as persistence
 from api.models import Job
-from extractor.persistence.connector import Driver
 from extractor.model.network import Network
-from extractor.image_generator import ImageGenerator
 from extractor.crawlers.twitter import get_friends, twitter_network
 
 is_prod = config.ENV == 'PROD'
@@ -26,15 +24,10 @@ def run_linkedin(job, username, password):
             msg = str(graph)
             failed = True
         else:
-            loader = BulkLoader()
-            image_gen = ImageGenerator(graph)
-            driver = Driver()
-            network = Network(job.name, job.id, utils.generate_timestamp(),
-                              len(graph.nodes()), job.type.description, image_gen.get_image_ref())
+
             try:
-                query = loader.get_query(graph, 'Connection', 'CONNECTED_TO')
-                driver.link_graph_to_user(job.user_id, root_id, network.__dict__, query)
-            except BulkLoaderException as e:
+                persistence.load(graph, root_id, job, label='Connection', rel='CONNECTED_TO')
+            except Exception as e:
                 msg = str(e)
                 failed = True
 
@@ -48,11 +41,17 @@ def run_twitter(job, screen_name):
     if is_prod:
 
         try:
-            seed_id = get_friends.run(screen_name)
-            graph = twitter_network.generate_graph(seed_id=seed_id)
-            print('done')
+            root_id = get_friends.run(screen_name)
+            graph = twitter_network.generate_graph(seed_id=root_id)
+
+            try:
+                persistence.load(graph, root_id, job, label='Follower', rel='IS_FOLLOWING')
+            except Exception as e:
+                msg = str(e)
+                failed = True
+
         except Exception as error:
-            msg = str(error)
+            msg = 'Failed to fetch graph'
             failed = True
 
     on_complete(job, failed, msg)
@@ -67,3 +66,4 @@ def on_complete(job, failed, msg):
 
     Job.update(job_id=job.id, status=msg, is_complete=True,
                is_success=not failed, end_time=utils.generate_timestamp())
+

@@ -42,12 +42,16 @@ LINKEDIN = {
 }
 
 NEO4J = {
-    'host': 'http://localhost:7474',
-    'username': 'neo4j',
-    'password': 'neo4j'
+    'default': {
+        'db_name': 'graph.db',
+        'username': 'neo4j',
+        'password': 'neo4j',
+        'host': '127.0.0.1',
+        'port': '7687'
+    }
 }
 
 GENERAL = {
-    'generated_image_path': os.path.join('/'.join(os.path.abspath(os.path.dirname(__file__)).split('/')[:-2]), 'Exograph-Server/public/img/graph')
+    'generated_image_path': os.path.join('/'.join(os.path.abspath(os.path.dirname(__file__)).split('/')[:-2]), 'exograph-server/public/img/graph')
 }
 

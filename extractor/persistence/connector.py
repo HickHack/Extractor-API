@@ -1,4 +1,4 @@
-from extractor_api.settings import NEO4J
+import extractor.settings as config
 from neo4j.v1 import GraphDatabase, basic_auth
 
 
@@ -13,18 +13,18 @@ class Driver(object):
 
     def parse_settings(self):
         try:
-            default = NEO4J['default']
+            default = config.NEO4J['default']
 
-            self.host = 'bolt://%s:%s' % (default['HOST'], default['PORT'])
-            self.username = default['USERNAME']
-            self.password = default['PASSWORD']
+            self.host = 'bolt://%s:%s' % (default['host'], default['port'])
+            self.username = default['username']
+            self.password = default['password']
         except KeyError:
-            raise DriverParseException('Unable to load database settings')
+            raise DriverParseException('Unable to load persistence settings')
 
     # This is a bit hacky because py2neo doesn't yet support
     # queries of this level using their Object Graph Mapper (OGM)
     # TODO: Run queries in one transaction
-    def link_graph_to_user(self, user_id, root_id, attr_dict, social_graph_query):
+    def link_graph_to_user(self, user_id, root_id, attr_dict, social_graph_query, label):
         session = self.driver.session()
 
         session.run(social_graph_query)
@@ -36,9 +36,10 @@ class Driver(object):
 
         session.run('MATCH (u:User) WHERE id(u)= {user_id}'
                     'OPTIONAL MATCH (g:Network {job_id: {job_id}}) '
-                    'OPTIONAL MATCH (c:Connection {member_id: {root_id}}) '
+                    'OPTIONAL MATCH (c:%s {member_id: {root_id}}) '
                     'CREATE (u)-[:OWNS]->(g)-[:CONTAINS]->(c)',
-                    {'user_id': user_id, 'job_id': attr_dict['job_id'], 'root_id': root_id})
+                    {'user_id': user_id, 'job_id': attr_dict['job_id'],
+                     'root_id': root_id})
 
         session.close()
 

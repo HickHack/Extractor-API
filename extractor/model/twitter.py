@@ -5,6 +5,7 @@ Model representing a Twitter User
 import re
 import os
 import json
+import base64
 import extractor.settings as settings
 
 
@@ -27,11 +28,13 @@ class User(object):
         self.followers_ids = followers_ids
         self.friends_ids = friends_ids
         self.followers_count = followers_count
-        self.location = location
+        self.location = self.encode_data(location)
         self.member_since = member_since
-        self.profile_image_url = self.clean_image_profile_url(profile_image_url)
-        self.profile_url = self.create_profile_url(screen_name)
-        self.description = self.clean_description(description)
+        self.profile_image_url = self.encode_data(self.clean_image_profile_url(profile_image_url))
+        self.profile_url = self.encode_data(self.create_profile_url(screen_name))
+        self.description = self.encode_data(self.clean_description(description))
+
+        self.clean()
 
     @staticmethod
     def clean_image_profile_url(url):
@@ -76,6 +79,17 @@ class User(object):
         return None
 
     @staticmethod
+    def encode_data(data):
+        match = re.match('^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{4}|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)+$', data)
+
+        if not match:
+            return base64.b64encode(data.encode('utf-8')).decode('utf-8')
+        elif data == '':
+            return ' '
+
+        return data
+
+    @staticmethod
     def exists(id):
         return os.path.exists(User.get_path(id))
 
@@ -108,4 +122,10 @@ class User(object):
             'description': self.description,
             'profile_image_url': self.profile_image_url,
             'profile_url': self.profile_url
+
         }
+
+    def clean(self):
+        self.name = self.name.replace("'", '')
+        self.name = self.name.replace(",", '')
+

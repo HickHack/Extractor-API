@@ -79,7 +79,7 @@ class BulkLoader(object):
                     map(lambda x: "%s:%s" % (x[0], x[1]) if not type(x[1]) == str else '%s:"%s"' % (x[0], x[1]),
                         edge_items))
 
-            # NOTE: Declare the links by their Cypher node-identifier rather than their Networkx node identifier
+            # Declare the links by their Cypher node-identifier rather than their Networkx node identifier
             self._edge_statements.append("(%s)-[:%s %s]->(%s)" % (
                 self._node_statements[edge[0]][0], self._rel, edge_attributes, self._node_statements[edge[1]][0]))
 
