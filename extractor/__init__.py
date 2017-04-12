@@ -42,14 +42,8 @@ def run_twitter(job, screen_name):
 
         try:
             root_id = get_friends.run(screen_name)
-            graph = twitter_network.generate_graph(seed_id=root_id)
-
-            try:
-                persistence.load(graph, root_id, job, label='Follower', rel='IS_FOLLOWING')
-            except Exception as e:
-                msg = str(e)
-                failed = True
-
+            graph, root_uuid = twitter_network.generate_graph(seed_id=root_id)
+            persistence.load(graph, root_uuid, job, label='Follower', rel='IS_FOLLOWING')
         except Exception as error:
             msg = 'Failed to fetch graph'
             failed = True
