@@ -17,8 +17,8 @@ TWITTER = {
         'users': os.path.join(TWITTER_CACHE_DIR, 'users')
     },
     'limits': {
-        'max_friends': 25,
-        'friends_of_friends': 25,
+        'max_friends': 50,
+        'friends_of_friends': 50,
         'max_depth': 2
     }
 }

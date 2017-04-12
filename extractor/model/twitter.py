@@ -6,6 +6,7 @@ import re
 import os
 import json
 import base64
+import uuid
 import extractor.settings as settings
 
 
@@ -13,7 +14,7 @@ class User(object):
     def __init__(self, name, screen_name, id,
                  friends_count, followers_count, location,
                  profile_image_url, member_since, description,
-                 friends_ids=None, followers_ids=None):
+                 friends_ids=None, followers_ids=None, u_uuid=None):
 
         if followers_ids is None:
             followers_ids = []
@@ -33,7 +34,8 @@ class User(object):
         self.profile_image_url = self.encode_data(self.clean_image_profile_url(profile_image_url))
         self.profile_url = self.encode_data(self.create_profile_url(screen_name))
         self.description = self.encode_data(self.clean_description(description))
-
+        self.uuid = u_uuid
+        self.generate_uuid()
         self.clean()
 
     @staticmethod
@@ -75,7 +77,7 @@ class User(object):
                         followers_count=user['followers_count'], location=user['location'],
                         member_since=user['member_since'], description=user['description'],
                         profile_image_url=user['profile_image_url'], friends_ids=user['friends_ids'],
-                        followers_ids=user['followers_ids'])
+                        followers_ids=user['followers_ids'], u_uuid=user['uuid'])
         return None
 
     @staticmethod
@@ -85,7 +87,7 @@ class User(object):
         if not match:
             return base64.b64encode(data.encode('utf-8')).decode('utf-8')
         elif data == '':
-            return ' '
+            return ''
 
         return data
 
@@ -121,11 +123,23 @@ class User(object):
             'member_since': self.member_since,
             'description': self.description,
             'profile_image_url': self.profile_image_url,
-            'profile_url': self.profile_url
-
+            'profile_url': self.profile_url,
+            'uuid': self.uuid
         }
 
     def clean(self):
         self.name = self.name.replace("'", '')
         self.name = self.name.replace(",", '')
 
+    def generate_uuid(self):
+        if self.uuid is None:
+            self.uuid = str(uuid.uuid4())
+
+    def regenerate_uuid(self):
+        """ Reset UUID. If it is the same generate another one """
+        new_uuid = str(uuid.uuid4())
+
+        if not new_uuid == self.uuid:
+            self.uuid = new_uuid
+        else:
+            self.uuid = str(uuid.uuid4())

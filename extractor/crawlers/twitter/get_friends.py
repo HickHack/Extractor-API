@@ -12,7 +12,7 @@ auth.set_access_token(credentials['access_token'], credentials['access_secret'])
 api = tweepy.API(auth)
 
 
-def get_friends(centre, max_depth=1, current_depth=0, taboo_list=None):
+def get_friends(centre, max_depth=1, current_depth=0, taboo_list=None, is_root=False):
     print('current depth: %d, max depth: %d' % (current_depth, max_depth))
 
     if taboo_list is None:
@@ -46,6 +46,10 @@ def get_friends(centre, max_depth=1, current_depth=0, taboo_list=None):
                     return taboo_list
         else:
             user = User.load(centre)
+
+        if is_root:
+            user.regenerate_uuid()
+            user.persist()
 
         # Retrieve Friends
         if not user.has_discovered_friends():
@@ -107,7 +111,7 @@ def run(screen_name, depth=2):
         matches = api.lookup_users(screen_names=[screen_name])
 
         if len(matches) == 1:
-            get_friends(matches[0].id, max_depth=depth)
+            get_friends(matches[0].id, max_depth=depth, is_root=True)
             return matches[0].id
     except Exception:
         raise Exception('Can\'t retrieve data for %s' % screen_name)

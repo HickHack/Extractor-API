@@ -26,6 +26,7 @@ def process_friends(seed_id, edges=None, depth=0, max_depth=3):
 def generate_graph(seed_id):
     edges = process_friends(seed_id)
     graph = nx.DiGraph()
+    root_uuid = None
 
     for (follower_id, followee_id) in edges:
         if User.exists(follower_id) and User.exists(followee_id):
@@ -36,5 +37,8 @@ def generate_graph(seed_id):
             graph.add_node(followee.id, followee.get_attributes())
             graph.add_edge(follower.id, followee.id)
 
-    return graph
+            if follower_id == seed_id:
+                root_uuid = follower.uuid
+
+    return graph, root_uuid
 
