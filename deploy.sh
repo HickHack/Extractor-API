@@ -1,7 +1,7 @@
 function init() {
-    chmod +x ~/Extractor-API/dependencies
+    # chmod +x ~/Extractor-API/dependencies
     sudo mysql -u root -p < ~/Extractor-API/setup.sql
-    ~/Extractor-API/dependencies
+    # ~/Extractor-API/dependencies
     launch
 }
 
