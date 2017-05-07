@@ -8,10 +8,10 @@ LINKEDIN_CACHE_DIR = os.path.join(CACHE_DIR, 'linkedin')
 
 TWITTER = {
     'oauth': {
-        'consumer_key': 'rHvRleQWXoYSIXRka0GRbJaPe',
-        'consumer_secret': 'FZ61mtqKr8qEAkTDr2CJyTlHPqlDla7LLGNjTo4TyJkE3PmH5H',
-        'access_token': '3306707327-WJNm0c7mlH77OLzQQCR9eBndACvN9qYYA8oJfic',
-        'access_secret': 'cc8bwd5W3QFPCXIaLJnsWxiro8OG4qp53p1g8RoXtFMHU',
+        'consumer_key': '0vKduBqsTBAHyoHhSdiMebiCl',
+        'consumer_secret': 'wRKth6dJb4VtYbCmnLh4BlhGSJ6GwbnliSUq0tI7B4TZrvQrFh',
+        'access_token': '3306707327-JPeaVubPJSHUJwCNRoAVWMKQH7zEFsz6sLrP54m',
+        'access_secret': 'U5r07PzQP4b3oXV0fOxepZTOH6T9aeVzslcDRl8hzbShx',
     },
     'cache': {
         'users': os.path.join(TWITTER_CACHE_DIR, 'users')

@@ -12,20 +12,20 @@ auth.set_access_token(credentials['access_token'], credentials['access_secret'])
 api = tweepy.API(auth)
 
 
-def get_friends(centre, max_depth=1, current_depth=0, taboo_list=None, is_root=False):
+def get_friends(centre, max_depth=1, current_depth=0, visited_list=None, is_root=False):
     print('current depth: %d, max depth: %d' % (current_depth, max_depth))
 
-    if taboo_list is None:
-        taboo_list = []
+    if visited_list is None:
+        visited_list = []
     if current_depth == max_depth:
         print('out of depth')
-        return taboo_list
+        return visited_list
 
-    if centre in taboo_list:
+    if centre in visited_list:
         print('Already been here.')
-        return taboo_list
+        return visited_list
     else:
-        taboo_list.append(centre)
+        visited_list.append(centre)
 
     try:
 
@@ -43,7 +43,7 @@ def get_friends(centre, max_depth=1, current_depth=0, taboo_list=None, is_root=F
                         time.sleep(15 * 60 + 15)
                         continue
 
-                    return taboo_list
+                    return visited_list
         else:
             user = User.load(centre)
 
@@ -58,11 +58,11 @@ def get_friends(centre, max_depth=1, current_depth=0, taboo_list=None, is_root=F
             print('Retrieving friends for user "%s" (%s)' % (user.name, user.screen_name))
 
             # page over friends
-            c = tweepy.Cursor(api.friends, id=user.id).items()
+            cursor = tweepy.Cursor(api.friends, id=user.id).items()
 
             while True:
                 try:
-                    friend = User.create(c.next())
+                    friend = User.create(cursor.next())
                     if not User.exists(friend.id):
                         friend.persist()
                     user.add_friend(friend.id)
@@ -74,6 +74,9 @@ def get_friends(centre, max_depth=1, current_depth=0, taboo_list=None, is_root=F
                         print('Rate limited. Sleeping for 15 minutes.')
                         time.sleep(15 * 60 + 15)
                         continue
+                    elif str(error) == 'Not authorized.':
+                        print('Error: ' + str(error) + ' Skipping user')
+                        pass
                     else:
                         print('Error: ' + str(error))
                         continue
@@ -87,8 +90,8 @@ def get_friends(centre, max_depth=1, current_depth=0, taboo_list=None, is_root=F
         cd = current_depth
         if cd + 1 < max_depth:
             for fid in user.friends_ids[:max_friends_of_friends]:
-                taboo_list = get_friends(fid, max_depth=max_depth,
-                                         current_depth=cd + 1, taboo_list=taboo_list)
+                visited_list = get_friends(fid, max_depth=max_depth,
+                                           current_depth=cd + 1, visited_list=visited_list)
 
         if cd + 1 < max_depth and len(user.friends_ids) > max_friends_of_friends:
             print('Not all friends retrieved for %s.' % user.screen_name)
@@ -97,7 +100,7 @@ def get_friends(centre, max_depth=1, current_depth=0, taboo_list=None, is_root=F
         print('Error retrieving followers for user id: ', centre)
         print(error)
 
-    return taboo_list
+    return visited_list
 
 
 def run(screen_name, depth=2):
