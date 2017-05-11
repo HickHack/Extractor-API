@@ -76,7 +76,7 @@ def get_friends(centre, max_depth=1, current_depth=0, visited_list=None, is_root
                         continue
                     elif str(error) == 'Not authorized.':
                         print('Error: ' + str(error) + ' Skipping user')
-                        pass
+                        break
                     else:
                         print('Error: ' + str(error))
                         continue
