@@ -60,6 +60,7 @@ def process_get_job_by_id(pk):
 
 def process_get_job_by_user_id(user_id, count=-1):
     payload = ResponsePayload()
+    jobs_set = []
 
     if count == -1:
         jobs_set = Job.objects.all().filter(user_id=user_id)
