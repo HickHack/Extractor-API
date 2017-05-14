@@ -52,7 +52,7 @@ class ResponsePayload(object):
         self.message = message
         self.jobs = []
         self.count = 0
-
+        self.pagination = {}
         if isinstance(summary, JobsSummary):
             self.summary = summary.__dict__
         else:

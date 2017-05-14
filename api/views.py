@@ -89,6 +89,7 @@ class JobsView(ViewSet):
     def get_by_user_id(self, request, user_id, format=None):
         # Default is -1 which returns all
         count = request.GET.get('count', -1)
+        page = int(request.GET.get('page', 0))
 
         try:
             if not type(count) == int:
@@ -96,7 +97,10 @@ class JobsView(ViewSet):
         except ValueError:
             count = 0
 
-        payload = controllers.process_get_job_by_user_id(user_id, count)
+        if page > 0:
+            payload = controllers.paginate_jobs_by_user_id(user_id, page)
+        else:
+            payload = controllers.process_get_job_by_user_id(user_id, count)
 
         return JsonResponse(data=payload.__dict__, status=status.HTTP_200_OK)
 
