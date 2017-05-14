@@ -103,7 +103,7 @@ def get_friends(centre, max_depth=1, current_depth=0, visited_list=None, is_root
     return visited_list
 
 
-def run(screen_name, depth=2):
+def run(screen_name, depth=settings.TWITTER['limits']['max_depth']):
 
     if depth < 1 or depth > 3:
         raise Exception('Depth value %d is not valid' % depth)
