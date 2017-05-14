@@ -11,6 +11,7 @@ from threading import Thread
 from api.models import JobType, Job
 from api.utils import ResponsePayload, JobsSummary
 from api.serialisers import JobSerializer
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 
 def process_linkedin_run(name, username, password, user_id):
@@ -73,6 +74,28 @@ def process_get_job_by_user_id(user_id, count=-1):
     return payload
 
 
+def paginate_jobs_by_user_id(user_id, page):
+    payload = ResponsePayload()
+    jobs_list = Job.objects.all().filter(user_id=user_id).order_by('id').reverse()
+    paginator = Paginator(jobs_list, 8)
+
+    try:
+        jobs = paginator.page(page)
+    except PageNotAnInteger:
+        jobs = paginator.page(1)
+    except EmptyPage:
+        jobs = paginator.page(paginator.num_pages)
+
+    for job in jobs:
+        data = form_job(job)
+        payload.add_job(data)
+
+    payload.pagination['total'] = paginator.count
+    payload.pagination['num_pages'] = paginator.num_pages
+
+    return payload
+
+
 def form_job(job):
     serialized = JobSerializer(job)
     data = serialized.data
@@ -84,7 +107,7 @@ def form_job(job):
 def process_get_user_job_summary(user_id):
     running_count = Job.objects.all().filter(user_id=user_id, complete=False).count()
 
-    summary = JobsSummary(user_id=user_id, warning_count=3, running_count=running_count)
+    summary = JobsSummary(user_id=user_id, warning_count=0, running_count=running_count)
     payload = ResponsePayload(summary=summary)
 
     return payload
