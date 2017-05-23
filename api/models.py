@@ -9,9 +9,11 @@ class JobType(models.Model):
 class Job(models.Model):
     user_id = models.IntegerField()
     name = models.CharField(max_length=300, default='')
+    screen_name = models.CharField(max_length=300, default='')
     status = models.CharField(max_length=100)
     complete = models.BooleanField(default=False)
     success = models.BooleanField(default=False)
+    queued = models.BooleanField(default=False)
     type = models.ForeignKey(JobType)
     start_time = models.BigIntegerField(default=0)
     end_time = models.BigIntegerField(default=0)
@@ -28,6 +30,8 @@ class Job(models.Model):
         job.total_time = end_time - job.start_time
 
         job.save()
+
+
 
 
 
