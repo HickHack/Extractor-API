@@ -17,9 +17,9 @@ TWITTER = {
         'users': os.path.join(TWITTER_CACHE_DIR, 'users')
     },
     'limits': {
-        'max_friends': 25,
-        'friends_of_friends': 25,
-        'max_depth': 3
+        'max_friends': 10,
+        'friends_of_friends': 10,
+        'max_depth': 2
     }
 }
 
@@ -52,6 +52,7 @@ NEO4J = {
 }
 
 GENERAL = {
-    'generated_image_path': os.path.join('/'.join(os.path.abspath(os.path.dirname(__file__)).split('/')[:-2]), 'exograph-server/public/img/graph')
+    'generated_image_path': os.path.join('/'.join(os.path.abspath(os.path.dirname(__file__)).split('/')[:-2]), 'Exograph-Server/public/img/graph')
 }
 
+print(GENERAL['generated_image_path'])

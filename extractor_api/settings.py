@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'rest_framework.authtoken',
     'rest_framework',
-    'api.apps.ApiConfig',
+    'api.apps.ApiConfig'
 ]
 SITE_ID = 1
 
